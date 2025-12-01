@@ -1,0 +1,12 @@
+# --- Criptografía Core (Tu versión actual) ---
+ecdsa==0.19.0
+six==1.16.0
+
+# --- Generación de Identidad / Semillas (BIP39) ---
+mnemonic==0.20
+
+# --- Formato de Direcciones (Wallet Address) ---
+base58==2.1.1
+
+# --- Testing (Para solucionar el error de pytest) ---
+pytest==8.0.0
