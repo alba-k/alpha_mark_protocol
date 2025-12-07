@@ -2,7 +2,7 @@
 '''
 class TxOutput:
     Modelo inmutable que representa una Salida de Transacción no gastada (UTXO).
-
+    
     Methods::
         to_dict() -> Dict[str, Any]: Serialización.
 '''
@@ -29,8 +29,12 @@ class TxOutput:
         return self._script_pubkey
 
     def to_dict(self) -> Dict[str, Any]:
+        """
+        Serializa el Output. El valor monetario debe ser serializado como STRING 
+        para preservar la precisión a través de la red (evitar float).
+        """
         return {
-            "value_alba": self._value_alba,
+            "value_alba": str(self._value_alba), # ⚡ CORRECCIÓN CLAVE: Convertir INT a STR
             "script_pubkey": self._script_pubkey
         }
     

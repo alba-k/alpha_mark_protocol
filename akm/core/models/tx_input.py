@@ -2,7 +2,7 @@
 '''
 class TxInput:
     Modelo inmutable que representa una Entrada de Transacción.
-
+    
     Methods::
         to_dict() -> Dict[str, Any]: Serialización estándar.
 '''
@@ -18,12 +18,10 @@ class TxInput:
         if output_index < 0:
             raise ValueError("TxInput: El índice del output no puede ser negativo.")
 
-        
         self._previous_tx_hash: str = previous_tx_hash
         self._output_index: int = output_index
         self._script_sig: str = script_sig
 
-    
     @property
     def previous_tx_hash(self) -> str:
         return self._previous_tx_hash
@@ -36,7 +34,13 @@ class TxInput:
     def script_sig(self) -> str:
         return self._script_sig
 
+    @script_sig.setter
+    def script_sig(self, value: str):
+        """Permite asignar la firma después de crear el objeto."""
+        self._script_sig = value
+
     def to_dict(self) -> Dict[str, Any]:
+        # ✅ No se requiere modificación aquí, los tipos son seguros (str y int pequeño)
         return {
             "previous_tx_hash": self._previous_tx_hash,
             "output_index": self._output_index,

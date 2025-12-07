@@ -1,59 +1,47 @@
-# akm/core/factories/transaction_factory.py
-'''
-class TransactionFactory:
-    Fábrica encargada de la construcción segura de transacciones.
-    Centraliza la lógica de creación, cálculo de hash y firma.
-
-    Methods::
-        create_pay_to_public_key_hash(inputs, outputs, timestamp) -> Transaction:
-            Crea una transacción estándar de pago (P2PKH).
-        create_coinbase(miner_pubkey_hash, block_height, total_reward) -> Transaction:
-            Crea la transacción especial de generación de monedas (Coinbase).
-'''
-
+# alpha_mark_protocol/akm/core/factories/transaction_factory.py
 import time
 from typing import List
 from akm.core.models.transaction import Transaction
 from akm.core.models.tx_input import TxInput
 from akm.core.models.tx_output import TxOutput
 from akm.core.services.transaction_hasher import TransactionHasher
+# ⚡ IMPORTACIÓN REQUERIDA: Traemos la utilidad monetaria
+from akm.core.utils.monetary import Monetary, MonetaryInput 
 
 class TransactionFactory:
 
+    # -----------------------------------------------------------------------
+    # ⚡ NUEVO MÉTODO: Crea un Output seguro a partir de un monto AKM
+    # -----------------------------------------------------------------------
     @staticmethod
-    def create_pay_to_public_key_hash(
+    def create_output_from_akm(
+        amount_akm: MonetaryInput, 
+        script_pubkey: str
+    ) -> TxOutput:
+        """
+        Convierte un monto de entrada del usuario (AKM, float/str) a Albas (int) 
+        y crea un TxOutput seguro.
+        """
+        # 1. Conversión CRÍTICA: Aquí es donde usamos el conversor seguro
+        value_alba = Monetary.to_albas(amount_akm)
+        
+        # 2. Creamos el modelo usando el entero limpio
+        return TxOutput(value_alba=value_alba, script_pubkey=script_pubkey)
+
+    # -----------------------------------------------------------------------
+    # MÉTODOS EXISTENTES
+    # -----------------------------------------------------------------------
+    @staticmethod
+    def create_signed(
         inputs: List[TxInput],
         outputs: List[TxOutput],
-        timestamp: int = 0
+        fee: int = 0
     ) -> Transaction:
-        """
-        Construye una transacción estándar.
-        Calcula el hash (TXID) automáticamente basándose en el contenido.
-        """
-        # Si no se provee tiempo, usamos el actual (UTC Unix Seconds)
-        if timestamp == 0:
-            timestamp = int(time.time())
-
-        # 1. Crear instancia temporal sin hash (Dummy Hash) para poder serializarla
-        temp_tx = Transaction(
-            tx_hash="",
-            timestamp=timestamp,
-            inputs=inputs,
-            outputs=outputs,
-            fee=0 # El fee se calcula externamente o se deduce implícitamente (Inputs - Outputs)
-        )
-
-        # 2. Calcular el Hash Real (TXID) usando el servicio de dominio
+        # Nota: Aquí asumimos que 'outputs' y 'fee' ya vienen en ALBAS limpios.
+        timestamp = int(time.time())
+        temp_tx = Transaction("", timestamp, inputs, outputs, fee)
         tx_id = TransactionHasher.calculate(temp_tx)
-
-        # 3. Retornar el objeto inmutable definitivo
-        return Transaction(
-            tx_hash=tx_id,
-            timestamp=timestamp,
-            inputs=inputs,
-            outputs=outputs,
-            fee=0
-        )
+        return Transaction(tx_id, timestamp, inputs, outputs, fee)
 
     @staticmethod
     def create_coinbase(
@@ -61,37 +49,35 @@ class TransactionFactory:
         block_height: int,
         total_reward: int
     ) -> Transaction:
-        """
-        Crea la transacción Coinbase (Emisión).
-        Reglas: Sin inputs reales, paga el subsidio + fees al minero.
-        """
-        # Coinbase Input: No referencia UTXO previo.
-        # En Bitcoin se usa el hash nulo y el índice 0xFFFFFFFF.
-        # Aquí usamos convención simplificada: lista vacía de inputs.
-        # (Opcional: Podríamos agregar un input con datos arbitrarios 'height' como script_sig para entropía extra)
-        coinbase_inputs: List[TxInput] = []
+        # total_reward ya es un entero (Alba) suministrado por el consenso, es seguro.
+        coinbase_msg = f"Mined at height {block_height}"
+        
+        coinbase_input = TxInput(
+            previous_tx_hash="0" * 64,  # Hash Nulo
+            output_index=0xFFFFFFFF,    # Índice Máximo
+            script_sig=coinbase_msg
+        )
 
-        # Coinbase Output: El pago al minero
         coinbase_outputs = [
             TxOutput(value_alba=total_reward, script_pubkey=miner_pubkey_hash)
         ]
 
         timestamp = int(time.time())
 
-        # Instancia temporal
         temp_tx = Transaction(
             tx_hash="",
             timestamp=timestamp,
-            inputs=coinbase_inputs,
-            outputs=coinbase_outputs
+            inputs=[coinbase_input], 
+            outputs=coinbase_outputs,
+            fee=0
         )
 
-        # Hash definitivo
         tx_id = TransactionHasher.calculate(temp_tx)
 
         return Transaction(
             tx_hash=tx_id,
             timestamp=timestamp,
-            inputs=coinbase_inputs,
-            outputs=coinbase_outputs
+            inputs=[coinbase_input],
+            outputs=coinbase_outputs,
+            fee=0
         )

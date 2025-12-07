@@ -1,0 +1,346 @@
+/* akm/interface/web/styles.css */
+
+/* =========================================
+   1. CONFIGURACIÓN (Variables Globales)
+   ========================================= */
+:root {
+    /* -- Paleta de Colores Oscura -- */
+    --color-bg-deep: #050508;
+    /* Fondo Principal */
+    --color-bg-panel: #0f0f17;
+    /* Paneles/Tarjetas */
+    --color-bg-input: #1a1a27;
+    /* Inputs */
+
+    /* -- Acentos Neón -- */
+    --color-primary: #d500f9;
+    /* Púrpura Neón Principal */
+    --color-secondary: #7c4dff;
+    /* Púrpura Medio */
+    --color-tertiary: #4a148c;
+    /* Púrpura Oscuro */
+
+    /* -- Textos -- */
+    --color-text-main: #e2e2e8;
+    --color-text-muted: #8f8f9d;
+    --color-success: #00e676;
+    /* Verde Matrix */
+    --color-danger: #ef4444;
+
+    /* -- Efectos -- */
+    --shadow-neon: 0 0 20px rgba(213, 0, 249, 0.5);
+    --shadow-card: 0 15px 50px rgba(0, 0, 0, 0.7);
+    --border-glass: 1px solid rgba(124, 77, 255, 0.2);
+    --highlight-glass: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================
+   2. BASE
+   ========================================= */
+body {
+    background-color: var(--color-bg-deep);
+    color: var(--color-text-main);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+
+    /* Fondo de Red Digital */
+    background-image:
+        linear-gradient(to bottom, rgba(5, 5, 8, 1) 20%, rgba(5, 5, 8, 0.4) 100%),
+        linear-gradient(var(--color-bg-deep) 2px, transparent 2px),
+        linear-gradient(90deg, var(--color-bg-deep) 2px, transparent 2px),
+        linear-gradient(rgba(124, 77, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124, 77, 255, 0.1) 1px, transparent 1px);
+    background-size: 100% 100%, 100px 100px, 100px 100px, 25px 25px, 25px 25px;
+    background-position: center center;
+}
+
+/* =========================================
+   3. COMPONENTES
+   ========================================= */
+
+/* --- Navbar --- */
+.navbar {
+    background: rgba(15, 15, 23, 0.7) !important;
+    backdrop-filter: blur(20px) saturate(120%);
+    border-bottom: var(--border-glass);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.brand-text {
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+
+    background: linear-gradient(to right, #fff 20%, var(--color-primary) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    text-shadow: 0 0 30px rgba(124, 77, 255, 0.6);
+}
+
+.gothic-logo {
+    filter: drop-shadow(0 0 8px var(--color-primary));
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.navbar-brand:hover .gothic-logo {
+    transform: scale(1.15) rotate(-5deg);
+    filter: drop-shadow(0 0 15px var(--color-primary));
+}
+
+/* --- Cards (Glassmorphism) --- */
+.card {
+    background: linear-gradient(145deg, rgba(26, 26, 39, 0.6), rgba(15, 15, 23, 0.8)) !important;
+    backdrop-filter: blur(20px);
+    border: var(--border-glass);
+    border-top-color: rgba(124, 77, 255, 0.3);
+    box-shadow: var(--shadow-card), var(--highlight-glass);
+    border-radius: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), var(--highlight-glass);
+    border-color: rgba(124, 77, 255, 0.4);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(124, 77, 255, 0.15) !important;
+    background: transparent !important;
+}
+
+/* --- Botones --- */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-tertiary));
+    border: none;
+    box-shadow: 0 4px 15px rgba(74, 20, 140, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    box-shadow: var(--shadow-neon);
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00c853, #00695c);
+    border: none;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, var(--color-success), #00c853);
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.6);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* --- Inputs --- */
+.form-control {
+    background-color: rgba(26, 26, 39, 0.8) !important;
+    border: 1px solid rgba(124, 77, 255, 0.2);
+    color: var(--color-text-main) !important;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: var(--color-bg-input) !important;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(213, 0, 249, 0.3), inset 0 0 10px rgba(124, 77, 255, 0.1);
+}
+
+.input-group-text {
+    background-color: rgba(42, 42, 58, 0.8);
+    border-color: rgba(124, 77, 255, 0.2);
+    color: var(--color-text-muted);
+}
+
+/* --- Tabs --- */
+.nav-tabs {
+    border-bottom: 1px solid rgba(124, 77, 255, 0.1);
+    margin-bottom: 1.5rem !important;
+}
+
+.nav-tabs .nav-link {
+    color: var(--color-text-muted);
+    border: none;
+    background: transparent;
+    transition: all 0.3s;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--color-text-main);
+    opacity: 1;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent !important;
+    color: var(--color-primary) !important;
+    position: relative;
+    opacity: 1;
+}
+
+.nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background: var(--color-primary);
+    box-shadow: 0 0 10px var(--color-primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* --- Alertas --- */
+.alert-info {
+    background-color: rgba(124, 77, 255, 0.1) !important;
+    border: 1px solid rgba(124, 77, 255, 0.4) !important;
+    color: #d1c4e9 !important;
+    box-shadow: 0 0 15px rgba(124, 77, 255, 0.1);
+}
+
+/* =========================================
+   4. UTILIDADES Y DETALLES (FIX DE OVERFLOW)
+   ========================================= */
+
+/* --- Control de la Tarjeta de Saldo --- */
+.balance-card {
+    min-width: 280px;
+}
+
+.balance-container {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+#balance-amount {
+    /* Rompe el número si es muy largo para que no se salga */
+    word-break: break-all;
+
+    /* Tamaño de fuente adaptable (Clamp) */
+    font-size: clamp(2rem, 5vw, 3rem) !important;
+    line-height: 1.1;
+
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    letter-spacing: -2px;
+
+    background: linear-gradient(to bottom, #ffffff, #d1c4e9);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    animation: pulseGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% {
+        text-shadow: 0 0 10px rgba(124, 77, 255, 0.2);
+    }
+
+    100% {
+        text-shadow: 0 0 25px rgba(213, 0, 249, 0.5);
+    }
+}
+
+/* Ajuste para el símbolo AKM */
+.balance-symbol {
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    white-space: nowrap;
+}
+
+/* En pantallas muy pequeñas, el símbolo baja */
+@media (max-width: 350px) {
+    .balance-container .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .balance-symbol {
+        margin-top: 0.25rem;
+    }
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+    text-shadow: 0 0 12px rgba(213, 0, 249, 0.6);
+}
+
+.text-success {
+    color: var(--color-success) !important;
+    text-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+}
+
+.text-muted {
+    color: var(--color-text-muted) !important;
+}
+
+.wallet-address {
+    font-family: 'Courier New', monospace;
+    background: rgba(15, 15, 23, 0.6);
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(124, 77, 255, 0.3);
+    color: var(--color-primary);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.mnemonic-box {
+    background-color: #0a0a0a !important;
+    border: 1px solid var(--color-success);
+    color: var(--color-success) !important;
+    font-family: monospace;
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.2);
+}
+
+.hidden {
+    display: none;
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#loading-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-tertiary), var(--color-primary), #fff);
+    box-shadow: 0 0 15px var(--color-primary);
+    z-index: 9999;
+    transition: width 0.4s ease;
+    width: 0%;
+}

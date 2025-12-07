@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # NODO 1: EL MINERO (ALICE)
+  # ==========================================
+  miner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: akm_miner
+    environment:
+      - AKM_API_TITLE=Node 01 (Miner)
+      - AKM_API_PORT=8000
+      - AKM_DB_NAME=miner.db
+      - AKM_MINING_ENABLED=True
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/miner:/app/data
+
+  # ==========================================
+  # NODO 2: WALLET (BOB)
+  # ==========================================
+  wallet-bob:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: akm_bob
+    depends_on:
+      - miner
+    environment:
+      - AKM_API_TITLE=Node 02 (Bob)
+      - AKM_API_PORT=8000
+      - AKM_DB_NAME=bob.db
+      - AKM_MINING_ENABLED=False
+      - AKM_SEEDS=miner:5000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./data/bob:/app/data
+
+  # ==========================================
+  # NODO 3: WALLET (CHARLIE)
+  # ==========================================
+  wallet-charlie:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: akm_charlie
+    depends_on:
+      - miner
+    environment:
+      - AKM_API_TITLE=Node 03 (Charlie)
+      - AKM_API_PORT=8000
+      - AKM_DB_NAME=charlie.db
+      - AKM_MINING_ENABLED=False
+      - AKM_SEEDS=miner:5000
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./data/charlie:/app/data

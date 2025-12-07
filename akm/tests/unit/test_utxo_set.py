@@ -5,14 +5,11 @@ Test Suite para UTXOSet (Libro Mayor):
     funcione correctamente como fuente de verdad para saldos y validación de gastos.
 
     Functions::
-        test_add_outputs_and_supply():
-            Verifica el registro de nuevas monedas y el cálculo del suministro total.
-        test_balance_calculation():
-            Verifica la suma correcta de UTXOs para calcular el saldo de una dirección.
-        test_remove_inputs_and_double_spend():
-            Verifica que las monedas se consuman y que el sistema maneje intentos de doble gasto.
-        test_get_utxo_by_reference():
-            Verifica la búsqueda de monedas existentes y el manejo de referencias inválidas.
+        test_add_outputs_and_supply(): Verifica registro y suministro.
+        test_balance_calculation(): Verifica cálculo de saldo.
+        test_remove_inputs_and_double_spend(): Verifica consumo y prevención de doble gasto.
+        test_get_utxo_by_reference(): Verifica búsqueda individual.
+        test_get_utxos_for_address_structure(): (NUEVO) Verifica el formato para la Wallet.
 '''
 
 import logging
@@ -87,6 +84,40 @@ def test_get_utxo_by_reference():
     assert not_found is None
     print("[SUCCESS] Prueba de Búsqueda OK.\n")
 
+def test_get_utxos_for_address_structure():
+    print(">> Ejecutando: test_get_utxos_for_address_structure...")
+    utxo_set = UTXOSet()
+    
+    # Escenario: Alice tiene 2 UTXOs, Bob tiene 1
+    # TX1: Output 0 -> Alice (100)
+    out_alice_1 = TxOutput(100, TEST_ADDRESS_1)
+    utxo_set.add_outputs("TX_1", [out_alice_1])
+    
+    # TX2: Output 0 -> Bob (50), Output 1 -> Alice (200)
+    out_bob = TxOutput(50, TEST_ADDRESS_2)
+    out_alice_2 = TxOutput(200, TEST_ADDRESS_1)
+    utxo_set.add_outputs("TX_2", [out_bob, out_alice_2])
+    
+    # Ejecutar método nuevo
+    alice_utxos = utxo_set.get_utxos_for_address(TEST_ADDRESS_1)
+    
+    # Verificaciones
+    assert len(alice_utxos) == 2, "Alice debería tener 2 UTXOs"
+    
+    # Verificar estructura del primer UTXO (TX_1)
+    # Buscamos en la lista (el orden no está garantizado en sets, pero en listas de append sí suele estarlo)
+    utxo_1 = next(u for u in alice_utxos if u['tx_hash'] == "TX_1")
+    assert utxo_1['amount'] == 100
+    assert utxo_1['output_index'] == 0
+    assert utxo_1['output_object'] == out_alice_1
+    
+    # Verificar estructura del segundo UTXO (TX_2)
+    utxo_2 = next(u for u in alice_utxos if u['tx_hash'] == "TX_2")
+    assert utxo_2['amount'] == 200
+    assert utxo_2['output_index'] == 1
+    
+    print("[SUCCESS] Estructura detallada de UTXOs para Wallet OK.\n")
+
 if __name__ == "__main__":
     print("==========================================")
     print("   EJECUTANDO TESTS UTXO MANUALMENTE      ")
@@ -97,6 +128,7 @@ if __name__ == "__main__":
         test_balance_calculation()
         test_remove_inputs_and_double_spend()
         test_get_utxo_by_reference()
+        test_get_utxos_for_address_structure()
         
         print("==========================================")
         print("   TODOS LOS TESTS PASARON EXITOSAMENTE   ")
