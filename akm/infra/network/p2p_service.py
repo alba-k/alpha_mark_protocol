@@ -94,10 +94,13 @@ class P2PService(INetworkService):
         }
         try:
             json_bytes = json.dumps(handshake_msg).encode('utf-8')
-            # En esta implementación básica usamos broadcast. 
-            # El ConnectionManager se encarga de enviarlo.
-            self.connection.broadcast(json_bytes) 
-            logging.info(f"🤝 [P2P] Handshake enviado a {peer_id}")
+            
+            # 🔥 CORRECCIÓN APLICADA: Usar envío directo (Unicast)
+            if not self.connection.send_direct(peer_id, json_bytes):
+                logging.error(f"❌ [P2P] Fallo al enviar Handshake a {peer_id}")
+            else:
+                logging.info(f"🤝 [P2P] Handshake enviado a {peer_id}")
+                
         except Exception as e:
             logging.error(f"[P2P] Error Handshake: {e}")
 

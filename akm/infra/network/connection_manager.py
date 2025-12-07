@@ -84,6 +84,31 @@ class ConnectionManager:
                 logging.warning(f"⚠️ [NET] Error enviando a {peer_id}. Cerrando conexión.")
                 self._disconnect(peer_id)
 
+    # 🔥 NUEVO MÉTODO AGREGADO: Envío directo (Unicast)
+    def send_direct(self, peer_id: str, data: bytes) -> bool:
+        """
+        Envía un mensaje directo a un solo peer específico (Unicast).
+        Retorna True si se envió, False si falló.
+        """
+        packet = data + self._delimiter
+        
+        sock = None
+        # Usamos el lock para leer el diccionario de forma segura
+        with self._lock:
+            sock = self._peers.get(peer_id)
+        
+        if sock:
+            try:
+                sock.sendall(packet)
+                return True
+            except Exception:
+                logging.warning(f"⚠️ [NET] Error enviando directo a {peer_id}.")
+                self._disconnect(peer_id)
+                return False
+        
+        logging.warning(f"⚠️ [NET] Intento de envío a peer desconocido: {peer_id}")
+        return False
+
     def get_active_peers(self) -> List[str]:
         with self._lock:
             return list(self._peers.keys())
