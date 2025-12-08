@@ -52,13 +52,25 @@ class FullNode(BaseNode):
 
     def _hydrate_and_check_genesis(self):
         """Recupera el estado desde el disco (Cold Start)."""
-        if self.blockchain.chain:
-            logging.info(f"📚 Hidratando estado desde {len(self.blockchain)} bloques...")
-            self.utxo_set.clear()
-            for block in self.blockchain.chain:
-                self.reorg_manager.apply_block_to_state(block)
         
-        if len(self.blockchain) == 0:
+        # [CORRECCIÓN DE ESCALABILIDAD]
+        # Evitamos usar 'self.blockchain.chain' porque carga TODO en RAM.
+        # En su lugar, obtenemos la altura y pedimos los bloques uno a uno.
+        chain_height = len(self.blockchain)
+        
+        if chain_height > 0:
+            logging.info(f"📚 Hidratando estado desde {chain_height} bloques...")
+            self.utxo_set.clear()
+            
+            # Iteración eficiente: Carga -> Procesa -> Libera memoria
+            for i in range(chain_height):
+                block = self.blockchain.get_block_by_index(i)
+                if block:
+                    self.reorg_manager.apply_block_to_state(block)
+                else:
+                    logging.error(f"❌ Error crítico: Bloque #{i} no encontrado en disco durante hidratación.")
+        
+        if chain_height == 0:
             logging.warning("⚠️ Blockchain vacía. Creando Génesis...")
             genesis = GenesisBlockFactory.create_genesis_block()
             if self.consensus.add_block(genesis):
