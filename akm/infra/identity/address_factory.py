@@ -1,13 +1,4 @@
 # akm/infra/identity/address_factory.py
-'''
-class AddressFactory:
-    Fábrica estática para la transformación de Claves Públicas en Direcciones Base58Check.
-
-    Methods::
-        create_from_public_key(public_key_hex) -> str:
-            Genera la dirección amigable legible por humanos.
-'''
-
 import hashlib
 import binascii
 import logging

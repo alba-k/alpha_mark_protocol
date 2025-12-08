@@ -1,0 +1,33 @@
+{
+    "node_type": "FULL",
+    "network": {
+        "network_id": "akm_mainnet",
+        "p2p_port": 9333,
+        "max_peers": 125,
+        "seed_nodes": [
+            "127.0.0.1:9333"
+        ]
+    },
+    "rpc": {
+        "enabled": true,
+        "rpc_port": 9334,
+        "rpc_user": "akm_admin",
+        "rpc_password": "change_this_password_securely",
+        "allowed_ips": [
+            "127.0.0.1"
+        ]
+    },
+    "storage": {
+        "data_dir": "./data/blockchain_db",
+        "db_cache_mb": 450,
+        "prune_mode": false
+    },
+    "consensus": {
+        "block_time_target_sec": 600,
+        "max_block_weight": 4000000
+    },
+    "mempool": {
+        "max_mempool_size_mb": 300,
+        "min_relay_tx_fee": 1000
+    }
+}

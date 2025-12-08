@@ -9,6 +9,7 @@ from akm.core.utils.node_mapper import NodeMapper
 # Infraestructura e Interfaces
 from akm.infra.network.p2p_service import P2PService
 from akm.core.managers.gossip_manager import GossipManager
+from akm.core.config.protocol_constants import ProtocolConstants  # [IMPORTANTE]
 
 # Core Managers y Modelos
 from akm.core.models.blockchain import Blockchain
@@ -24,7 +25,8 @@ logging.basicConfig(level=logging.INFO, format='[FullNode] %(message)s')
 class FullNode(BaseNode):
     """
     [LSP] Nodo Completo (Validating Node).
-    Mantiene una copia completa de la Blockchain y valida reglas de consenso.
+    Mantiene una copia completa de la Blockchain, valida reglas de consenso
+    y SIRVE datos a los clientes ligeros (SPV).
     """
 
     def __init__(
@@ -53,9 +55,7 @@ class FullNode(BaseNode):
     def _hydrate_and_check_genesis(self):
         """Recupera el estado desde el disco (Cold Start)."""
         
-        # [CORRECCIÓN DE ESCALABILIDAD]
-        # Evitamos usar 'self.blockchain.chain' porque carga TODO en RAM.
-        # En su lugar, obtenemos la altura y pedimos los bloques uno a uno.
+        # Usamos la propiedad .height (o len) que es segura
         chain_height = len(self.blockchain)
         
         if chain_height > 0:
@@ -63,12 +63,9 @@ class FullNode(BaseNode):
             self.utxo_set.clear()
             
             # Iteración eficiente: Carga -> Procesa -> Libera memoria
-            for i in range(chain_height):
-                block = self.blockchain.get_block_by_index(i)
-                if block:
-                    self.reorg_manager.apply_block_to_state(block)
-                else:
-                    logging.error(f"❌ Error crítico: Bloque #{i} no encontrado en disco durante hidratación.")
+            # Usamos el iterador optimizado para no saturar RAM
+            for block in self.blockchain.get_history_iterator():
+                self.reorg_manager.apply_block_to_state(block)
         
         if chain_height == 0:
             logging.warning("⚠️ Blockchain vacía. Creando Génesis...")
@@ -84,33 +81,41 @@ class FullNode(BaseNode):
         """
         Reacciona a mensajes validados que llegan de la red.
         """
-        if msg_type == "BLOCK":
+        # --- MENSAJES DE CONSENSO (Escritura / Estado) ---
+        if msg_type == ProtocolConstants.MSG_BLOCK:
             logging.info(f"📨 [Consenso] Bloque recibido de {peer_id[:8]}...")
             try:
-                # Usamos el Mapper para convertir JSON -> Objeto
                 block = NodeMapper.reconstruct_block(payload)
-                
-                # Validar y Guardar
                 if self.consensus.add_block(block):
                     logging.info(f"✅ Bloque #{block.index} ACEPTADO.")
-                    # [Clean Code] Propagar payload puro. GossipManager se encarga del 'envelope'.
                     self.gossip.propagate_block(payload, origin_peer=peer_id)
                 else:
                     logging.info("🗑️ Bloque rechazado.")
             except Exception as e:
                 logging.error(f"Error procesando bloque: {e}")
 
-        elif msg_type == "TX":
-            logging.info(f"📨 [Consenso] TX recibida de {peer_id[:8]}...")
+        elif msg_type == ProtocolConstants.MSG_TX:
+            logging.debug(f"📨 [Consenso] TX recibida de {peer_id[:8]}...")
             try:
                 tx = NodeMapper.reconstruct_transaction(payload)
-                
                 if self.mempool.add_transaction(tx):
                     logging.info(f"✅ TX {tx.tx_hash[:8]} en Mempool.")
-                    # [Clean Code] Propagar payload puro.
                     self.gossip.propagate_transaction(payload, origin_peer=peer_id)
             except Exception as e:
                 logging.error(f"Error procesando TX: {e}")
+
+        # --- MENSAJES DE SERVICIO SPV (Lectura / Cliente-Servidor) ---
+        # El FullNode actúa como servidor para los nodos móviles
+        
+        elif msg_type == ProtocolConstants.MSG_GET_HEADERS:
+            # ✅ CORRECTO: Usamos método público process_get_headers
+            # Delegamos al GossipManager que tiene acceso a la Blockchain para buscar headers
+            self.gossip.process_get_headers(payload, peer_id)
+
+        elif msg_type == ProtocolConstants.MSG_GET_MERKLE_PROOF:
+            # ✅ CORRECTO: Usamos método público process_get_proof
+            # Delegamos la búsqueda de pruebas de pago
+            self.gossip.process_get_proof(payload, peer_id)
     
     def submit_transaction(self, tx: Transaction) -> bool:
         """
@@ -118,10 +123,6 @@ class FullNode(BaseNode):
         """
         if self.mempool.add_transaction(tx):
             logging.info(f"🚀 Transacción aceptada localmente: {tx.tx_hash[:8]}")
-            
-            # [CORRECCIÓN IMPORTANTE]
-            # Ya NO creamos el diccionario {"type": "TX"}. 
-            # Pasamos los datos crudos y dejamos que GossipManager haga su trabajo.
             self.gossip.propagate_transaction(tx.to_dict()) 
             return True
         

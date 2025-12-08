@@ -1,6 +1,5 @@
 # akm/core/managers/wallet_manager.py
 import logging
-import base58 # ⚡ NUEVO IMPORT: Para decodificar la dirección
 from typing import List
 from decimal import Decimal
 
@@ -12,9 +11,8 @@ from akm.core.models.tx_output import TxOutput
 from akm.core.factories.transaction_factory import TransactionFactory
 from akm.core.services.transaction_hasher import TransactionHasher
 from akm.infra.identity.address_factory import AddressFactory
-from akm.core.utils.monetary import Monetary
-# ⚡ NUEVO IMPORT: Necesitamos los opcodes para construir el candado
-from akm.core.scripting.opcodes import Opcodes 
+# ⚡ IMPORTACIÓN REQUERIDA: Usamos el conversor monetario seguro
+from akm.core.utils.monetary import Monetary 
 
 logging.basicConfig(level=logging.INFO, format='[Wallet] %(message)s')
 
@@ -37,43 +35,23 @@ class WalletManager:
         
     def get_display_balance(self, utxo_set: UTXOSet) -> Decimal:
         """
-        Consulta el saldo interno (Albas) y lo convierte a AKM (Decimal).
+        Consulta el saldo interno (Albas) y lo convierte a AKM (Decimal) 
+        para una visualización segura y precisa.
         """
         public_key = self.get_public_key()
         my_address = AddressFactory.create_from_public_key(public_key)
+        
+        # 1. Obtener el saldo interno (siempre es un INT de Albas)
         balance_albas = utxo_set.get_balance_for_address(my_address)
+        
+        # 2. Convertir a formato legible (Decimal AKM)
         return Monetary.to_akm(balance_albas)
-
-    # --------------------------------------------------------------------------
-    # ⚡ HELPER NUEVO: Convierte "Dirección (Str)" -> "ScriptPubKey (Bytes)"
-    # --------------------------------------------------------------------------
-    def _create_p2pkh_script(self, address: str) -> bytes:
-        """
-        Genera el script de bloqueo estándar (P2PKH).
-        Estructura: OP_DUP OP_HASH160 <Hash160> OP_EQUALVERIFY OP_CHECKSIG
-        """
-        try:
-            # 1. Decodificar Base58Check (quita checksum)
-            decoded = base58.b58decode_check(address)
-            # 2. Quitar el byte de versión (0x00) del inicio para obtener el Hash puro
-            pub_key_hash = decoded[1:] 
-            
-            # 3. Construir el script en bytes
-            # [76] [a9] [len] [hash...] [88] [ac]
-            script = (
-                bytes([Opcodes.OP_DUP, Opcodes.OP_HASH160]) +
-                bytes([len(pub_key_hash)]) + pub_key_hash + 
-                bytes([Opcodes.OP_EQUALVERIFY, Opcodes.OP_CHECKSIG])
-            )
-            return script
-        except Exception as e:
-            raise ValueError(f"Dirección inválida '{address}': {str(e)}")
 
     def create_transaction(
         self, 
         recipient_address: str, 
-        amount_alba: int, 
-        fee: int,       
+        amount_alba: int, # Ya es un INT (Albas)
+        fee: int,         # Ya es un INT (Albas)
         utxo_set: UTXOSet
     ) -> Transaction:
         # 1. Obtener mi identidad real
@@ -90,55 +68,56 @@ class WalletManager:
         required_total = amount_alba + fee
 
         for utxo_data in available_utxos:
+            # CORRECCIÓN DE TIPADO: script_sig inicial vacío debe ser bytes
+            empty_script_sig = b"" 
+            
             inputs.append(TxInput(
                 previous_tx_hash=utxo_data["tx_hash"],
                 output_index=utxo_data["output_index"],
-                script_sig=b"" 
+                script_sig=empty_script_sig 
             ))
+            # 'utxo_data["amount"]' ya es un entero (Albas), lo cual es seguro.
             accumulated_value += utxo_data["amount"]
             
             if accumulated_value >= required_total:
                 break
         
-        # Validación de balance
+        # Validación de balance (todo en enteros Albas)
         if accumulated_value < required_total:
+            # Usamos Monetary.to_akm() solo para el mensaje de error legible
             balance_akm = Monetary.to_akm(accumulated_value)
             required_akm = Monetary.to_akm(required_total)
             raise ValueError(
                 f"Fondos insuficientes. Tienes {balance_akm:.8f} AKM, requieres {required_akm:.8f} AKM."
             )
 
-        # 3. Outputs (CORREGIDO: Usamos el helper para crear bytes)
+        # 3. Outputs
         outputs: List[TxOutput] = []
         
-        # A. Output al destinatario
-        script_recipient = self._create_p2pkh_script(recipient_address)
-        outputs.append(TxOutput(amount_alba, script_recipient))
+        # ⚡ CORRECCIÓN DE TIPADO: Convertir Address String -> Bytes
+        recipient_addr_bytes = recipient_address.encode('utf-8')
+        outputs.append(TxOutput(amount_alba, recipient_addr_bytes))
         
-        # B. Output de cambio (si sobra plata)
         change = accumulated_value - required_total
         if change > 0:
-            script_change = self._create_p2pkh_script(my_address)
-            outputs.append(TxOutput(change, script_change))
+            # ⚡ CORRECCIÓN DE TIPADO: Convertir Change Address String -> Bytes
+            my_addr_bytes = my_address.encode('utf-8')
+            outputs.append(TxOutput(change, my_addr_bytes))
             
         tx = TransactionFactory.create_signed(inputs, outputs, fee=fee)
         
-        # 4. Firmar Inputs (Manteniendo la corrección anterior de bytes)
+        # 4. Firmar Inputs
         for inp in tx.inputs:
-            signature_hex = self.sign_transaction_hash(tx.tx_hash)
-            
-            sig_bytes = bytes.fromhex(signature_hex)
-            pub_bytes = bytes.fromhex(public_key)
-            
-            inp.script_sig = (
-                bytes([len(sig_bytes)]) + sig_bytes +
-                bytes([len(pub_bytes)]) + pub_bytes
-            )
+            signature = self.sign_transaction_hash(tx.tx_hash)
+            # ⚡ CORRECCIÓN DE TIPADO: Convertir Firma compuesta String -> Bytes
+            script_sig_str = f"{signature} {public_key}" 
+            inp.script_sig = script_sig_str.encode('utf-8')
             
         # 5. Hash final
         final_hash = TransactionHasher.calculate(tx)
         tx.set_final_hash(final_hash)
         
+        # Usamos Monetary.to_akm() para el log (sin tocar el valor interno)
         amount_akm_display = Monetary.to_akm(amount_alba)
         logging.info(f"✅ Transacción creada: {tx.tx_hash[:8]} | Envía {amount_akm_display:.8f} AKM a {recipient_address[:8]}...")
         return tx

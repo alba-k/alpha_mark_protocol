@@ -2,11 +2,11 @@
 import logging
 
 from akm.core.models.transaction import Transaction
-from akm.core.models.tx_input import TxInput # Importación necesaria
+from akm.core.models.tx_input import TxInput
 from akm.core.managers.utxo_set import UTXOSet
 from akm.core.validators.transaction_validator import TransactionValidator
 from akm.infra.identity.address_factory import AddressFactory
-from akm.core.services.transaction_hasher import TransactionHasher # Necesario para recalcular el hash
+from akm.core.services.transaction_hasher import TransactionHasher
 
 logging.basicConfig(level=logging.INFO, format='[TxRulesValidator] %(message)s')
 
@@ -20,7 +20,7 @@ class TransactionRulesValidator:
         if tx.is_coinbase:
             return True
 
-        # 2. Integridad básica (Hash ID coincide con contenido actual)
+        # 2. Integridad básica
         if not TransactionValidator.verify_integrity(tx):
             logging.error(f"TX {tx.tx_hash[:8]}: Fallo de integridad hash.")
             return False
@@ -43,26 +43,23 @@ class TransactionRulesValidator:
 
     def _validate_inputs_and_signatures(self, tx: Transaction) -> int:
         # --- PASO CRÍTICO: CALCULAR EL SIGHASH ---
-        # La firma se generó sobre la transacción "limpia" (sin scripts).
-        # Debemos reconstruir ese estado para poder verificarla.
         
-        # 1. Crear copias de los inputs pero vaciando el script_sig
+        # 1. Crear copias de los inputs limpias
         clean_inputs = [
             TxInput(inp.previous_tx_hash, inp.output_index, script_sig="") 
             for inp in tx.inputs
         ]
         
-        # 2. Crear una transacción temporal idéntica a la original pero limpia
+        # 2. Transacción temporal para firmar
         signing_tx = Transaction(
-            tx_hash="", # No importa para el cálculo
+            tx_hash="",
             timestamp=tx.timestamp,
             inputs=clean_inputs,
             outputs=tx.outputs,
             fee=tx.fee
         )
         
-        # 3. Calcular el Hash de Firma (SigHash)
-        # Este es el hash exacto que firmó la Wallet.
+        # 3. Hash de Firma (SigHash)
         sighash = TransactionHasher.calculate(signing_tx)
 
         # --- VALIDACIÓN ---
@@ -80,26 +77,44 @@ class TransactionRulesValidator:
             
             # B. Desempaquetar P2PKH (Firma + Clave Pública)
             try:
-                parts = inp.script_sig.split(" ")
+                # ⚡ CORRECCIÓN: Decodificar bytes a string antes de hacer split
+                script_data = inp.script_sig
+                if isinstance(script_data, bytes):
+                    # Intentamos utf-8, si falla (datos binarios raros) usamos latin-1
+                    try:
+                        script_str = script_data.decode('utf-8')
+                    except UnicodeDecodeError:
+                        script_str = script_data.decode('latin-1')
+                else:
+                    script_str = str(script_data)
+
+                parts = script_str.split(" ")
+                
                 if len(parts) != 2:
+                    # Intento de fallback: A veces se unen sin espacio si la codificación falló
                     raise ValueError("Formato incorrecto (Esperado: 'Firma PubKey')")
                 
                 signature_hex = parts[0]
                 public_key_hex = parts[1]
-            except Exception:
-                raise ValueError(f"Input #{index}: ScriptSig malformado.")
+                
+            except Exception as e:
+                raise ValueError(f"Input #{index}: ScriptSig malformado ({e}).")
 
-            # C. Verificar Propiedad (Dirección derivada == Dueño del UTXO)
+            # C. Verificar Propiedad
+            # Aseguramos que script_pubkey del UTXO también se trate como string para comparar
+            utxo_addr = utxo.script_pubkey
+            if isinstance(utxo_addr, bytes):
+                utxo_addr = utxo_addr.decode('utf-8')
+
             derived_address = AddressFactory.create_from_public_key(public_key_hex)
             
-            if derived_address != utxo.script_pubkey:
-                raise ValueError(f"Input #{index}: Clave pública no corresponde al dueño (Dir incorrecta).")
+            if derived_address != utxo_addr:
+                raise ValueError(f"Input #{index}: Clave pública no corresponde al dueño.")
 
-            # D. VERIFICAR FIRMA (USANDO SIGHASH)
-            # Aquí usamos 'sighash' (lo que se firmó) en lugar de 'tx.tx_hash' (el resultado final)
+            # D. VERIFICAR FIRMA
             is_valid_sig = TransactionValidator.verify_signature(
                 public_key_hex=public_key_hex,
-                tx_hash=sighash,  # <--- CORRECCIÓN MAESTRA
+                tx_hash=sighash, 
                 signature_hex=signature_hex
             )
 

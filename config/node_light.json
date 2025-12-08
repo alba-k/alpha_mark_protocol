@@ -1,0 +1,17 @@
+{
+    "node_type": "LIGHT",
+    "network": {
+        "network_id": "akm_mainnet",
+        "p2p_port": 9335,
+        "max_peers": 8
+    },
+    "rpc": {
+        "rpc_port": 9336,
+        "rpc_user": "user_light",
+        "rpc_password": "123"
+    },
+    "storage": {
+        "data_dir": "./data/headers_db",
+        "prune_mode": true
+    }
+}

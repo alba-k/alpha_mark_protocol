@@ -13,7 +13,6 @@ class DatabaseManager:
         return cls._instance
 
     def _initialize(self):
-        # Leemos el nombre que pusiste en el código
         config = ConfigManager()
         self.db_path = config.persistence.db_name
         
@@ -24,6 +23,7 @@ class DatabaseManager:
 
     def _create_tables(self):
         cursor = self.conn.cursor()
+        # Tabla de Bloques
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS blocks (
                 block_index INTEGER PRIMARY KEY,
@@ -42,3 +42,25 @@ class DatabaseManager:
 
     def get_connection(self):
         return self.conn
+
+    def close(self):
+        """
+        Método público para cerrar la conexión limpiamente.
+        """
+        if self.conn:
+            try:
+                self.conn.close()
+                logging.info("🔌 Conexión a DB cerrada.")
+            except Exception as e:
+                logging.error(f"Error cerrando DB: {e}")
+
+    @classmethod
+    def reset(cls):
+        """
+        Método público para resetear el Singleton (Testing).
+        Cierra la conexión existente y limpia la instancia.
+        """
+        if cls._instance:
+            cls._instance.close()
+            cls._instance = None
+            logging.info("♻️  Singleton DatabaseManager reseteado.")

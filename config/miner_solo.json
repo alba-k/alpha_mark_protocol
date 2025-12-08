@@ -1,0 +1,13 @@
+{
+    "miner_name": "Jason_Miner_01",
+    "connection": {
+        "node_rpc_url": "http://127.0.0.1:9334"
+    },
+    "payout": {
+        "payout_address": "PRUEBA_DE_CONEXION_EXITOSA_JASON_001",
+        "coinbase_message": "Mined by Alpha Mark Protocol"
+    },
+    "performance": {
+        "threads": 4
+    }
+}

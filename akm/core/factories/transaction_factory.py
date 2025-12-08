@@ -25,8 +25,11 @@ class TransactionFactory:
         # 1. Conversión CRÍTICA: Aquí es donde usamos el conversor seguro
         value_alba = Monetary.to_albas(amount_akm)
         
-        # 2. Creamos el modelo usando el entero limpio
-        return TxOutput(value_alba=value_alba, script_pubkey=script_pubkey)
+        # ⚡ CORRECCIÓN DE TIPADO: String -> Bytes para Address
+        script_bytes = script_pubkey.encode('utf-8') if isinstance(script_pubkey, str) else script_pubkey # pyright: ignore[reportUnnecessaryIsInstance]
+
+        # 2. Creamos el modelo usando el entero limpio y bytes
+        return TxOutput(value_alba=value_alba, script_pubkey=script_bytes)
 
     # -----------------------------------------------------------------------
     # MÉTODOS EXISTENTES
@@ -50,16 +53,21 @@ class TransactionFactory:
         total_reward: int
     ) -> Transaction:
         # total_reward ya es un entero (Alba) suministrado por el consenso, es seguro.
-        coinbase_msg = f"Mined at height {block_height}"
+        coinbase_msg_str = f"Mined at height {block_height}"
+        # ⚡ CORRECCIÓN: String -> Bytes para script_sig
+        coinbase_msg_bytes = coinbase_msg_str.encode('utf-8')
         
         coinbase_input = TxInput(
-            previous_tx_hash="0" * 64,  # Hash Nulo
+            previous_tx_hash="0" * 64,  # Hash Nulo (String está bien aquí si el modelo lo permite, usualmente hashes son hex strings)
             output_index=0xFFFFFFFF,    # Índice Máximo
-            script_sig=coinbase_msg
+            script_sig=coinbase_msg_bytes
         )
 
+        # ⚡ CORRECCIÓN: String -> Bytes para Address
+        miner_addr_bytes = miner_pubkey_hash.encode('utf-8') if isinstance(miner_pubkey_hash, str) else miner_pubkey_hash # pyright: ignore[reportUnnecessaryIsInstance]
+
         coinbase_outputs = [
-            TxOutput(value_alba=total_reward, script_pubkey=miner_pubkey_hash)
+            TxOutput(value_alba=total_reward, script_pubkey=miner_addr_bytes)
         ]
 
         timestamp = int(time.time())

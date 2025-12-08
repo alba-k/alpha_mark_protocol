@@ -1,7 +1,7 @@
 # akm/infra/persistence/sqlite/sqlite_blockchain_repository.py
 import json
 import logging
-from typing import Optional, List, Any, Dict, Tuple, cast
+from typing import Optional, List, Any, Dict, Tuple
 
 # Interfaces y Modelos
 from akm.core.interfaces.i_repository import IBlockchainRepository
@@ -21,32 +21,39 @@ class SqliteBlockchainRepository(IBlockchainRepository):
 
     def save_block(self, block: Block) -> None:
         try:
-            txs_data = [tx.to_dict() for tx in block.transactions]
-            txs_json = json.dumps(txs_data)
-
-            cursor = self.conn.cursor()
-            cursor.execute('''
-                INSERT OR IGNORE INTO blocks 
-                (block_index, block_hash, previous_hash, timestamp, bits, nonce, merkle_root, data_json)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                block.index, 
-                block.hash, 
-                block.previous_hash, 
-                block.timestamp, 
-                block.bits, 
-                block.nonce, 
-                block.merkle_root,
-                txs_json
-            ))
-            
+            self._insert_block_cursor(self.conn.cursor(), block)
             self.conn.commit()
-            logging.info(f"💾 [SQLite] Bloque #{block.index} guardado.")
-            
+            logging.debug(f"💾 [SQLite] Bloque #{block.index} guardado.")
         except Exception as e:
-            logging.error(f"Error crítico guardando en SQLite: {e}")
+            logging.error(f"Error crítico guardando bloque en SQLite: {e}")
             self.conn.rollback()
             raise e
+
+    def save_blocks_atomic(self, blocks: List[Block]) -> None:
+        if not blocks: return
+        cursor = self.conn.cursor()
+        try:
+            for block in blocks:
+                self._insert_block_cursor(cursor, block)
+            self.conn.commit()
+            logging.info(f"💾 [SQLite] Batch Save: {len(blocks)} bloques.")
+        except Exception as e:
+            logging.error(f"❌ Error en Batch Save: {e}")
+            self.conn.rollback()
+            raise e
+
+    def _insert_block_cursor(self, cursor: Any, block: Block) -> None:
+        txs_data = [tx.to_dict() for tx in block.transactions]
+        txs_json = json.dumps(txs_data)
+
+        cursor.execute('''
+            INSERT OR REPLACE INTO blocks 
+            (block_index, block_hash, previous_hash, timestamp, bits, nonce, merkle_root, data_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            block.index, block.hash, block.previous_hash, block.timestamp, 
+            block.bits, block.nonce, block.merkle_root, txs_json
+        ))
 
     def get_last_block(self) -> Optional[Block]:
         cursor = self.conn.cursor()
@@ -72,51 +79,78 @@ class SqliteBlockchainRepository(IBlockchainRepository):
     def count(self) -> int:
         cursor = self.conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM blocks')
-        result = cursor.fetchone()
-        return result[0] if result else 0
+        res = cursor.fetchone()
+        return res[0] if res[0] else 0
+
+    def get_headers_range(self, start_hash: str, limit: int = 2000) -> List[Dict[str, Any]]:
+        cursor = self.conn.cursor()
+        start_index = 0
+        if start_hash:
+            cursor.execute('SELECT block_index FROM blocks WHERE block_hash = ?', (start_hash,))
+            row = cursor.fetchone()
+            if row: start_index = row[0] + 1
+
+        cursor.execute('''
+            SELECT block_index, block_hash, previous_hash, timestamp, bits, nonce, merkle_root 
+            FROM blocks WHERE block_index >= ? ORDER BY block_index ASC LIMIT ?
+        ''', (start_index, limit))
+        
+        headers: List[Dict[str, Any]] = []
+        for r in cursor.fetchall():
+            headers.append({
+                "index": int(r[0]), "hash": self._ensure_str(r[1]), "prev_hash": self._ensure_str(r[2]),
+                "timestamp": int(r[3]), "bits": self._ensure_str(r[4]), "nonce": int(r[5]), 
+                "merkle_root": self._ensure_str(r[6])
+            })
+        return headers
+
+    def _ensure_str(self, val: Any) -> str:
+        if val is None: return ""
+        if isinstance(val, bytes): return val.decode('utf-8')
+        return str(val)
 
     def _map_row_to_block(self, row: Tuple[Any, ...]) -> Block:
-        idx = int(row[0])
-        b_hash = str(row[1])
-        prev_hash = str(row[2])
-        ts = int(row[3])
-        bits = str(row[4])
-        nonce = int(row[5])
-        merkle = str(row[6])
-        data_json = str(row[7])
+        # Mapeo Básico
+        idx, b_hash, prev_hash, ts, bits, nonce, merkle, data_json = row
         
-        raw_txs = cast(List[Dict[str, Any]], json.loads(data_json))
+        # Deserialización TXs
+        raw_txs: List[Dict[str, Any]] = json.loads(self._ensure_str(data_json))
         transactions: List[Transaction] = []
         
         for tx_dict in raw_txs:
-            inputs = [
-                TxInput(str(i['previous_tx_hash']), int(i['output_index']), str(i['script_sig'])) 
-                for i in tx_dict['inputs']
-            ]
-            outputs = [
-                TxOutput(int(o['value_alba']), str(o['script_pubkey'])) 
-                for o in tx_dict['outputs']
-            ]
+            inputs: List[TxInput] = [] 
+            for i in tx_dict.get('inputs', []):
+                # ScriptSig limpio
+                sig_val = self._ensure_str(i.get('script_sig', ''))
+                inputs.append(TxInput(
+                    previous_tx_hash=self._ensure_str(i['previous_tx_hash']), 
+                    output_index=int(i['output_index']), 
+                    # El constructor de TxInput se encarga de convertir a bytes
+                    script_sig=sig_val 
+                ))
+            
+            outputs: List[TxOutput] = []
+            for o in tx_dict.get('outputs', []):
+                # ScriptPubKey limpio
+                pub_val = self._ensure_str(o['script_pubkey'])
+                outputs.append(TxOutput(
+                    value_alba=int(o['value_alba']), 
+                    # El constructor de TxOutput se encarga de convertir a bytes
+                    script_pubkey=pub_val
+                ))
             
             tx = Transaction(
-                tx_hash=str(tx_dict['tx_hash']),
+                tx_hash=self._ensure_str(tx_dict['tx_hash']),
                 timestamp=int(tx_dict['timestamp']),
                 inputs=inputs,
                 outputs=outputs,
                 fee=int(tx_dict.get('fee', 0))
             )
-            if hasattr(tx, 'set_final_hash'):
-                tx.set_final_hash(str(tx_dict['tx_hash']))
-                
             transactions.append(tx)
 
         return Block(
-            index=idx,
-            timestamp=ts,
-            previous_hash=prev_hash,
-            bits=bits,
-            merkle_root=merkle,
-            nonce=nonce,
-            block_hash=b_hash,
+            index=idx, timestamp=ts, previous_hash=self._ensure_str(prev_hash),
+            bits=self._ensure_str(bits), merkle_root=self._ensure_str(merkle),
+            nonce=nonce, block_hash=self._ensure_str(b_hash),
             transactions=transactions
         )

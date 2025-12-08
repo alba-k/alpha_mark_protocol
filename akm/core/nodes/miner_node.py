@@ -48,8 +48,6 @@ class MinerNode(FullNode):
         self._miner_address: Optional[str] = config.mining.default_miner_address
         self._mining_active = False
 
-    # ... (Resto de métodos start_mining_loop, etc. iguales que antes)
-
     def start_mining_loop(self, miner_address: Optional[str] = None):
         """
         Inicia el proceso de minería.
@@ -73,15 +71,25 @@ class MinerNode(FullNode):
         self._mining_active = False
         logging.info("🛑 Minería detenida.")
 
-    def mine_one_block(self) -> bool:
+    # ⚡ MODIFICACIÓN: Acepta miner_address opcional para test manual
+    def mine_one_block(self, miner_address: Optional[str] = None) -> bool:
         """Intenta minar un solo bloque."""
-        if not self._miner_address:
+        
+        # Determinar qué dirección usar (Argumento > Interna > Error)
+        target_address = miner_address if miner_address else self._miner_address
+
+        if not target_address:
             logging.error("Falta dirección de minero.")
             return False
 
+        # Actualizamos la interna por consistencia si no estaba seteadas
+        if not self._miner_address:
+            self._miner_address = target_address
+
         logging.info("🔨 Trabajando en bloque...")
         try:
-            new_block = self.miner.mine_block(self._miner_address)
+            # Usamos la dirección objetivo
+            new_block = self.miner.mine_block(target_address)
             
             if self.consensus.add_block(new_block):
                 logging.info(f"💎 ¡BLOQUE ENCONTRADO! Hash: {new_block.hash[:8]}")

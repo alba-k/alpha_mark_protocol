@@ -31,16 +31,22 @@ class GenesisBlockFactory:
         initial_subsidy_albas = consensus_conf.initial_subsidy # Valor entero (Albas)
 
         # 2. Construir la Transacción Coinbase
+        # ⚡ CORRECCIÓN DE TIPADO: Convertimos String -> Bytes para TxInput
+        coinbase_msg_bytes = gen_conf.coinbase_message.encode('utf-8')
+        
         coinbase_input = TxInput(
             previous_tx_hash=gen_conf.coinbase_input_prev_tx,
             output_index=gen_conf.coinbase_input_index,
-            script_sig=gen_conf.coinbase_message
+            script_sig=coinbase_msg_bytes
         )
+
+        # ⚡ CORRECCIÓN DE TIPADO: Convertimos String -> Bytes para TxOutput (Address)
+        miner_addr_bytes = gen_conf.miner_address.encode('utf-8')
 
         coinbase_output = TxOutput(
             # ⚡ CORRECCIÓN: Usamos el valor entero seguro de ConsensusConfig
             value_alba=initial_subsidy_albas,
-            script_pubkey=gen_conf.miner_address
+            script_pubkey=miner_addr_bytes
         )
 
         # Hash de la TX
