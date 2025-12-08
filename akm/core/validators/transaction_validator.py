@@ -1,93 +1,69 @@
 # akm/core/validators/transaction_validator.py
-'''
-class TransactionValidator:
-    Servicio de validación de seguridad (criptográfica) y económica (monetaria).
-
-    Methods::
-        verify_integrity(transaction) -> bool:
-            Recalcula el hash y confirma que coincide con el ID de la transacción.
-        verify_signature(public_key, tx_hash, signature) -> bool:
-            Verifica criptográficamente (ECDSA) que la firma sea válida para ese hash.
-        validate_monetary_balance(transaction, total_input_albas) -> bool:
-            Verifica que el balance Inputs >= Outputs + Fee, usando solo enteros.
-'''
-
 import logging
-import binascii
-# Importaciones criptográficas (Se asume que son correctas)
-from ecdsa import VerifyingKey, SECP256k1, util, BadSignatureError # type: ignore
+from typing import Dict
 
-# Dependencias
 from akm.core.models.transaction import Transaction
 from akm.core.services.transaction_hasher import TransactionHasher
+from akm.core.scripting.engine import ScriptEngine
+
+logger = logging.getLogger(__name__)
 
 class TransactionValidator:
+    """
+    Servicio de validación integral: Estructural, Monetaria y Scripts.
+    """
 
     @staticmethod
     def verify_integrity(transaction: Transaction) -> bool:
-        # Lógica existente para la validación de Hash
-        calculated_hash = TransactionHasher.calculate(transaction)
-        
-        if calculated_hash != transaction.tx_hash:
-            logging.warning(
-               f'''
-                TransactionValidator: Fallo de integridad. 
-                Calculado: {calculated_hash}, Recibido: {transaction.tx_hash}
-                '''
-            )
+        """Verifica que el hash de la transacción sea correcto (PoW/Integridad)."""
+        calc_hash = TransactionHasher.calculate(transaction)
+        if calc_hash != transaction.tx_hash:
+            logger.warning(f"Integridad fallida: Calc {calc_hash} != {transaction.tx_hash}")
             return False
-            
         return True
 
     @staticmethod
-    def verify_signature(public_key_hex: str, tx_hash: str, signature_hex: str) -> bool:
-        # Lógica existente para la validación de Firma
-        try:
-            pub_key_bytes = binascii.unhexlify(public_key_hex)
-            signature_bytes = binascii.unhexlify(signature_hex)
-            hash_bytes = binascii.unhexlify(tx_hash)
-
-            vk = VerifyingKey.from_string(pub_key_bytes, curve=SECP256k1) # type: ignore
-
-            return vk.verify_digest(signature_bytes, hash_bytes, sigdecode=util.sigdecode_der) # type: ignore
-
-        except (ValueError, BadSignatureError) as e:
-            logging.error(f"TransactionValidator: Firma inválida o clave malformada. {e}")
-            return False
-        except Exception as e:
-            logging.error(f"TransactionValidator: Error inesperado en verificación. {e}")
-            return False
-
-    # --------------------------------------------------------------------------
-    # ⚡ NUEVO MÉTODO: VALIDACIÓN MONETARIA
-    # --------------------------------------------------------------------------
-    @staticmethod
     def validate_monetary_balance(transaction: Transaction, total_input_albas: int) -> bool:
+        """Verifica Inputs >= Outputs + Fee (No inflación)."""
+        total_output = transaction.total_output_albas
+        total_cost = total_output + transaction.fee
+
+        if total_cost <= 0:
+            logger.error("Costo total inválido (<= 0).")
+            return False
+
+        if total_input_albas < total_cost:
+            logger.error(f"Fondos insuficientes: In {total_input_albas} < Cost {total_cost}")
+            return False
+        return True
+
+    @staticmethod
+    def verify_scripts(transaction: Transaction, previous_outputs: Dict[int, bytes]) -> bool:
         """
-        Verifica que el valor de las entradas sea suficiente para cubrir 
-        la suma de las salidas y la comisión. Todo en ALBAS (Enteros).
-        
+        Ejecuta la Stack Machine para cada entrada.
         Args:
-            transaction: La transacción a validar.
-            total_input_albas: El valor total (en Albas) de todas las entradas (UTXOs) gastadas.
+            previous_outputs: {input_index: script_pubkey_bytes} (El candado del UTXO a gastar)
         """
+        engine = ScriptEngine()
         
-        # 1. Calcular el Costo Total (Outputs + Fee)
-        # Los getters tx.total_output_albas y tx.fee ya devuelven enteros (Albas)
-        total_cost_albas = transaction.total_output_albas + transaction.fee
-        
-        # 2. Validación de Cero (Regla de Saneamiento)
-        if total_cost_albas <= 0:
-            logging.error("TransactionValidator: Costo total inválido (cero o negativo).")
-            return False
+        for i, inp in enumerate(transaction.inputs):
+            # Obtener el 'candado' (ScriptPubKey) del UTXO referenciado
+            script_pubkey = previous_outputs.get(i)
             
-        # 3. Validación de Balance (Inputs >= Cost)
-        if total_input_albas < total_cost_albas:
-            logging.error(
-                f"TransactionValidator: Fondos insuficientes. "
-                f"Input total: {total_input_albas} Albas. "
-                f"Costo total (Outputs + Fee): {total_cost_albas} Albas."
+            if not script_pubkey:
+                logger.error(f"Input {i}: No se encontró el UTXO o ScriptPubKey.")
+                return False
+
+            # Ejecutar Desbloqueo + Bloqueo
+            success = engine.execute(
+                script_sig=inp.script_sig,
+                script_pubkey=script_pubkey,
+                transaction=transaction,
+                tx_input_index=i
             )
-            return False
             
+            if not success:
+                logger.warning(f"Input {i}: Falló ejecución del Script.")
+                return False
+                
         return True
