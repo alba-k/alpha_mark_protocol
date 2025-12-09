@@ -11,13 +11,17 @@ class ProtocolConstants:
     MSG_TX: Final[str]        = "TRANSACTION"
     MSG_BLOCK: Final[str]     = "BLOCK"
     
+    # --- Protocolo de Sincronización (NUEVO) ---
+    MSG_SYNC_REQUEST: Final[str]  = "SYNC_REQUEST"   # Nodo pide bloques desde X
+    MSG_SYNC_BATCH: Final[str]    = "SYNC_BATCH"     # Nodo avanzado envía un lote de bloques
+    
     # --- Protocolo SPV (Light Clients) ---
-    MSG_GET_HEADERS: Final[str]      = "GET_HEADERS"      # Móvil pide headers
-    MSG_HEADERS: Final[str]          = "HEADERS"          # Nodo responde con headers
+    MSG_GET_HEADERS: Final[str]      = "GET_HEADERS"
+    MSG_HEADERS: Final[str]          = "HEADERS"
     
     # --- Protocolo de Verificación de Pagos (Merkle) ---
-    MSG_GET_MERKLE_PROOF: Final[str] = "GET_MERKLE_PROOF" # Móvil pide probar una TX
-    MSG_MERKLE_PROOF: Final[str]     = "MERKLE_PROOF"     # Nodo entrega la prueba
+    MSG_GET_MERKLE_PROOF: Final[str] = "GET_MERKLE_PROOF"
+    MSG_MERKLE_PROOF: Final[str]     = "MERKLE_PROOF"
     
     # --- Metadatos ---
     PROTOCOL_VERSION: Final[int] = 1

@@ -3,7 +3,7 @@ import sys
 import os
 from typing import List, Dict, Any, Union
 
-# 1. AJUSTE DE RUTAS PARA IMPORTACIONES
+# 1. AJUSTE DE RUTAS PARA IMPORTACIONES (Se mantiene tu ajuste de ruta)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '../../..'))
 if project_root not in sys.path:
@@ -34,19 +34,25 @@ from akm.core.managers.wallet_manager import WalletManager
 from akm.infra.crypto.software_signer import SoftwareSigner
 from akm.infra.identity.keystore import Keystore
 
-# --- LIFESPAN (Ciclo de Vida) ---
+# --- LIFESPAN (Ciclo de Vida CORREGIDO) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Inicializa el nodo correcto (Miner o SPV) según variables de entorno
-    NodeContainer.initialize()
-    yield
+    # 🔥 CORRECCIÓN CRÍTICA: Eliminamos NodeContainer.initialize()
+    # El nodo es creado e inyectado por src/node.py (el lanzador) antes de que Uvicorn arranque.
+    # Esta función solo se usa para tareas de inicio y cierre de la API.
+    
+    yield # La aplicación arranca y sirve peticiones aquí
+    
+    # Detención de servicios (El nodo principal se detiene desde src/node.py)
+    # Solo llamamos al shutdown del contenedor si es necesario para liberar recursos de la API.
+    # El NodeContainer.shutdown() se mantiene para liberar recursos, pero ya no arranca el nodo.
     NodeContainer.shutdown()
 
 # --- APP ---
 app = FastAPI(
     title=settings.title,
     version=settings.version,
-    lifespan=lifespan,
+    lifespan=lifespan, # Usamos el ciclo de vida corregido
     debug=settings.debug_mode
 )
 
@@ -102,7 +108,8 @@ def get_status(node: Union[MinerNode, SPVNode] = Depends(get_node_dependency)) -
 
     # Conteo de Peers (Común para ambos gracias a BaseNode)
     peers = 0
-    if hasattr(node, 'p2p') and node.p2p.connection:
+    # Es necesario el 'hasattr' check por si el nodo aún no ha terminado de inicializarse
+    if hasattr(node, 'p2p') and node.p2p.connection: 
         peers = len(node.p2p.connection.get_active_peers())
     
     return schemas.NodeStatusResponse(
@@ -132,8 +139,8 @@ def get_balance(address: str, node: Union[MinerNode, SPVNode] = Depends(get_node
         
         utxo_count = 0
         if hasattr(node, 'utxo_set'):
-             utxos = node.utxo_set.get_utxos_for_address(address)
-             utxo_count = len(utxos)
+            utxos = node.utxo_set.get_utxos_for_address(address)
+            utxo_count = len(utxos)
         
         balance_decimal = Monetary.to_akm(balance_albas)
         balance_human = float(balance_decimal) 
@@ -167,7 +174,8 @@ def get_blocks(limit: int = 10, node: Union[MinerNode, SPVNode] = Depends(get_no
             nonce=current.nonce
         ))
         if current.index == 0: break
-        current = node.blockchain.get_block_by_hash(current.previous_hash)
+        # Es necesario el 'get_block_by_hash' del repositorio
+        current = node.blockchain.get_block_by_hash(current.previous_hash) 
         count += 1
     return blocks
 

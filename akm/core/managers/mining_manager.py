@@ -1,13 +1,7 @@
 # akm/core/managers/mining_manager.py
-'''
-class MiningManager:
-    Orquestador del proceso de minería (Patrón Facade).
-    Coordina la selección de transacciones, el cálculo de la recompensa (Coinbase)
-    y la ejecución del Proof-of-Work para proponer nuevos bloques a la red.
-'''
-
 import logging
-from typing import List
+import threading
+from typing import List, Optional
 
 from akm.core.models.block import Block
 from akm.core.models.blockchain import Blockchain
@@ -33,7 +27,9 @@ class MiningManager:
         self._difficulty_adjuster = difficulty_adjuster
         self._config = ConfigManager()
 
-    def mine_block(self, miner_address: str) -> Block:
+    # ⚡ CAMBIO: Se añade argumento opcional interrupt_event
+    # ⚡ CAMBIO: Return type es Optional[Block] porque puede devolver None si se cancela
+    def mine_block(self, miner_address: str, interrupt_event: Optional[threading.Event] = None) -> Optional[Block]:
         """
         Orquesta la creación de un nuevo bloque.
         """
@@ -47,23 +43,19 @@ class MiningManager:
         height = last_block.index + 1
         previous_hash = last_block.hash
             
-        # 2. Calcular Dificultad Dinámica (CORREGIDO)
+        # 2. Calcular Dificultad Dinámica
         interval = self._config.difficulty_adjustment_interval
         
-        # Solo ajustamos si estamos en el límite del intervalo
         if height % interval == 0:
-            # Necesitamos el bloque de hace 'interval' posiciones
             prev_idx = max(0, height - interval)
             prev_adjustment_block = self._blockchain.get_block_by_index(prev_idx)
             
-            # Fallback de seguridad si no se encuentra
             if not prev_adjustment_block:
                 prev_adjustment_block = last_block
 
             bits = self._difficulty_adjuster.calculate_new_bits(prev_adjustment_block, last_block)
             logging.info(f"⚖️ Ajuste de Dificultad: Nuevo target bits {bits}")
         else:
-            # Si no toca ajuste, mantenemos la dificultad del último bloque
             bits = last_block.bits
 
         # 3. Seleccionar Transacciones
@@ -74,20 +66,23 @@ class MiningManager:
         # 4. Crear Coinbase
         coinbase_tx = self._create_coinbase_tx(miner_address, height, pending_txs)
 
-        # Lista final de transacciones
         block_transactions = [coinbase_tx] + pending_txs
 
-        # 5. Delegar la construcción y PoW al BlockBuilder
+        # 5. Delegar a BlockBuilder
         logging.info(f"Delegando a BlockBuilder. Height: {height}, TXs: {len(block_transactions)}, Bits: {bits}")
         
+        # ⚡ CAMBIO: Pasamos el evento de interrupción al Builder
         new_block = BlockBuilder.build(
             transactions=block_transactions,
             previous_hash=previous_hash,
             bits=bits,
-            index=height
+            index=height,
+            interrupt_event=interrupt_event
         )
 
-        logging.info(f"\nBloque minado exitosamente: {new_block.hash[:16]}... (Nonce: {new_block.nonce})")
+        if new_block:
+            logging.info(f"\nBloque minado exitosamente: {new_block.hash[:16]}... (Nonce: {new_block.nonce})")
+        
         return new_block
 
     def _create_coinbase_tx(self, miner_address: str, height: int, txs: List[Transaction]) -> Transaction:
@@ -101,7 +96,6 @@ class MiningManager:
 
         logging.info(f"💰 Construyendo Coinbase: Subsidio={base_subsidy} + Fees={total_fees} = Total={total_reward}")
 
-        # C. Fabricar la Transacción
         return TransactionFactory.create_coinbase(
             miner_pubkey_hash=miner_address,
             block_height=height,

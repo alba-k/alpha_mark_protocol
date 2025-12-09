@@ -35,12 +35,12 @@ class Blockchain(IChain):
         """
         return False 
 
-    # --- Métodos Propios de FullNode (Compatibilidad Legacy) ---
+    # --- Métodos Propios de FullNode (Soporte y Lógica) ---
 
     @property
     def last_block(self) -> Optional[Block]:
         """
-        [CORRECCIÓN] Alias necesario para que ConsensusOrchestrator funcione.
+        Alias necesario para que ConsensusOrchestrator funcione.
         """
         return self._repository.get_last_block()
 
@@ -59,10 +59,19 @@ class Blockchain(IChain):
             return blocks[0]
         return None
     
+    # 🔥 MÉTODO AÑADIDO: Proxy directo para IBD (Necesario para FullNode)
+    def get_blocks_range(self, start_index: int, limit: int) -> List[Block]:
+        """
+        Recupera un lote de bloques de forma consecutiva.
+        Necesario para la lógica de sincronización (IBD).
+        """
+        return self._repository.get_blocks_range(start_index, limit)
+
     def get_history_iterator(self, start_index: int = 0, batch_size: int = 100) -> Iterator[Block]:
         """Iterador eficiente para no cargar toda la DB en RAM."""
         current = start_index
         while True:
+            # [VERIFICADO] El método repository.get_blocks_range existe en la capa de persistencia.
             batch = self._repository.get_blocks_range(current, batch_size)
             if not batch:
                 break

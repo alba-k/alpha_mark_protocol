@@ -43,6 +43,8 @@ class SqliteBlockchainRepository(IBlockchainRepository):
             raise e
 
     def _insert_block_cursor(self, cursor: Any, block: Block) -> None:
+        # Nota: tx.to_dict() debe encargarse de que los campos bytes sean strings (hex o utf-8)
+        # para que json.dumps funcione.
         txs_data = [tx.to_dict() for tx in block.transactions]
         txs_json = json.dumps(txs_data)
 
@@ -120,23 +122,31 @@ class SqliteBlockchainRepository(IBlockchainRepository):
         for tx_dict in raw_txs:
             inputs: List[TxInput] = [] 
             for i in tx_dict.get('inputs', []):
-                # ScriptSig limpio
-                sig_val = self._ensure_str(i.get('script_sig', ''))
+                # 1. Recuperamos como string seguro
+                sig_str = self._ensure_str(i.get('script_sig', ''))
+                
+                # ⚡ CORRECCIÓN CRÍTICA: Convertir de vuelta a BYTES
+                # WalletManager usa UTF-8 para firmas compuestas "firma pubkey"
+                sig_bytes = sig_str.encode('utf-8')
+
                 inputs.append(TxInput(
                     previous_tx_hash=self._ensure_str(i['previous_tx_hash']), 
                     output_index=int(i['output_index']), 
-                    # El constructor de TxInput se encarga de convertir a bytes
-                    script_sig=sig_val 
+                    script_sig=sig_bytes 
                 ))
             
             outputs: List[TxOutput] = []
             for o in tx_dict.get('outputs', []):
-                # ScriptPubKey limpio
-                pub_val = self._ensure_str(o['script_pubkey'])
+                # 1. Recuperamos como string seguro
+                pub_str = self._ensure_str(o['script_pubkey'])
+                
+                # ⚡ CORRECCIÓN CRÍTICA: Convertir de vuelta a BYTES
+                # Las direcciones y scripts deben ser bytes para el hashing
+                pub_bytes = pub_str.encode('utf-8')
+
                 outputs.append(TxOutput(
                     value_alba=int(o['value_alba']), 
-                    # El constructor de TxOutput se encarga de convertir a bytes
-                    script_pubkey=pub_val
+                    script_pubkey=pub_bytes
                 ))
             
             tx = Transaction(

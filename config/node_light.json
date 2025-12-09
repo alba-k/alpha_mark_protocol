@@ -3,7 +3,10 @@
     "network": {
         "network_id": "akm_mainnet",
         "p2p_port": 9335,
-        "max_peers": 8
+        "max_peers": 8,
+        "seed_nodes": [
+            "127.0.0.1:9333"
+        ]
     },
     "rpc": {
         "rpc_port": 9336,

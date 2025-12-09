@@ -1,48 +1,47 @@
 #!/bin/bash
+# reset_network.sh
 
-# Colores para que se vea pro
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${YELLOW}=========================================${NC}"
-echo -e "${YELLOW}   AKM PROTOCOL - LIMPIEZA DE RED (RESET) ${NC}"
+echo -e "${YELLOW}   AKM PROTOCOL - HARD RESET (REAL DB)   ${NC}"
 echo -e "${YELLOW}=========================================${NC}"
-echo "Este script eliminará TODA la base de datos de la blockchain local."
-echo "Se borrarán:"
-echo "  1. La Blockchain completa (Full Node DB)"
-echo "  2. Las cabeceras ligeras (Light Node DB)"
-echo "  3. Los archivos de Logs"
+echo "ADVERTENCIA: Esto borrará permanentemente:"
+echo " 1. La Blockchain completa (SQLite/LevelDB)."
+echo " 2. El historial de transacciones y UTXOs."
+echo " 3. Logs de ejecución y caché compilada."
 
-read -p "¿Estás seguro de que quieres reiniciar la red desde cero? (s/n): " confirm
+read -p "¿Confirmar borrado total? (s/n): " confirm
 
 if [[ $confirm == "s" || $confirm == "S" ]]; then
-    echo -e "\n${RED}[LIMPIANDO] Eliminando datos antiguos...${NC}"
+    echo -e "\n${RED}[LIMPIANDO] Borrando sistema...${NC}"
 
-    # 1. Limpiar datos del Full Node
-    if [ -d "./data/blockchain_db" ]; then
-        rm -rf ./data/blockchain_db
-        echo " - Base de datos Full Node eliminada."
+    # 1. Eliminar directorio de datos (Donde vive blockchain_oficial.db)
+    # Según PersistenceConfig, esto es por defecto './data'
+    if [ -d "data" ]; then
+        rm -rf data
+        echo " - Directorio ./data/ eliminado (Blockchain purgada)."
     fi
 
-    # 2. Limpiar datos del Light Node
-    if [ -d "./data/headers_db" ]; then
-        rm -rf ./data/headers_db
-        echo " - Base de datos Light Node eliminada."
-    fi
-
-    # 3. Recrear carpetas vacías (Acondicionamiento)
-    mkdir -p ./data/blockchain_db
-    mkdir -p ./data/headers_db
-    mkdir -p ./logs
+    # 2. Eliminar bases de datos sueltas en raíz (por si acaso versiones viejas)
+    rm -f *.db
     
-    # 4. Crear un archivo de bloqueo o 'lock' (Simulación de entorno listo)
-    touch ./data/.fresh_state
+    # 3. Borrar logs
+    rm -f *.log
+    echo " - Logs eliminados."
 
-    echo -e "${GREEN}[EXITO] Entorno AKM acondicionado y limpio.${NC}"
-    echo -e "${GREEN}[LISTO] Ahora puedes iniciar el Nodo Maestro para generar el Bloque Génesis.${NC}"
+    # 4. Limpiar caché de Python (pycache) para evitar inconsistencias de código
+    find . -type d -name "__pycache__" -exec rm -rf {} +
+    echo " - Caché de Python (__pycache__) eliminada."
 
+    # 5. Recrear estructura limpia
+    mkdir -p data
+    
+    echo -e "${GREEN}[EXITO] Red reiniciada completamente.${NC}"
+    echo -e "${GREEN}El próximo inicio generará un nuevo Bloque GÉNESIS.${NC}"
 else
-    echo "Operación cancelada. No se borró nada."
+    echo "Operación cancelada."
 fi

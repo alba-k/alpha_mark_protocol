@@ -1,11 +1,9 @@
 # akm/interface/api/dependencies.py
-import os
 from typing import Optional, Dict, Any, Union
 
 # Imports de Capa Core
 from akm.core.nodes.miner_node import MinerNode
-from akm.core.nodes.spv_node import SPVNode  # [NUEVO]
-from akm.core.factories.node_factory import NodeFactory
+from akm.core.nodes.spv_node import SPVNode 
 
 # Imports de Infraestructura (Keystore)
 from akm.infra.identity.keystore import Keystore
@@ -13,21 +11,37 @@ from akm.infra.identity.keystore import Keystore
 # Imports de Interface
 from akm.interface.api.config import settings
 
+# Definimos el tipo base para facilitar la lectura
+CoreNodeType = Union[MinerNode, SPVNode] 
+
 class NodeContainer:
     """
     Service Container (Singleton).
-    Gestiona el ciclo de vida del nodo activo (Miner o SPV).
+    Gestiona el ciclo de vida del nodo activo (Inyección de Dependencias).
     """
-    _instance: Optional[Union[MinerNode, SPVNode]] = None # Soporte Polimórfico
+    _instance: Optional[CoreNodeType] = None # Soporte Polimórfico
     _keystore: Optional[Keystore] = None
     _active_identity: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def get_instance(cls) -> Union[MinerNode, SPVNode]:
+    def get_instance(cls) -> CoreNodeType:
+        """Acceso a la instancia del nodo activo."""
         if cls._instance is None:
-            raise RuntimeError("El nodo no ha sido inicializado.")
+            raise RuntimeError("El nodo no ha sido inicializado. Ejecute set_instance() primero.")
         return cls._instance
 
+    @classmethod
+    def set_instance(cls, node_instance: CoreNodeType):
+        """
+        🔥 NUEVA FUNCIÓN: Inyección de Dependencia (Setter).
+        Permite a src/node.py (el lanzador) inyectar el CoreNode ya creado.
+        """
+        if cls._instance is not None: return
+        cls._instance = node_instance
+        print("✅ [API-DI] Instancia de nodo inyectada correctamente.")
+
+    # [El resto de métodos get_keystore, get_active_identity, set_active_identity, y shutdown se mantienen]
+    
     @classmethod
     def get_keystore(cls) -> Keystore:
         if cls._keystore is None:
@@ -53,48 +67,12 @@ class NodeContainer:
                 cls._instance.start_mining_loop(address)
 
     @classmethod
-    def initialize(cls):
-        """Arranca el sistema leyendo la configuración de Docker."""
-        if cls._instance is not None: return
-
-        # 1. LEER TIPO DE NODO
-        node_type = os.getenv("NODE_TYPE", "FULL").upper()
-        
-        print(f"🔧 [API] Configurando entorno: {settings.db_name}")
-        os.environ["AKM_DB_NAME"] = settings.db_name
-        
-        print(f"🚀 [API] Iniciando motor blockchain en modo: {node_type}...")
-        
-        try:
-            if node_type == "SPV":
-                # --- MODO CLIENTE LIGERO ---
-                print("📱 Creando Nodo SPV (Mobile)...")
-                node = NodeFactory.create_spv_node()
-                node.start()
-                # Auto-sync opcional al inicio
-                node.sync()
-            else:
-                # --- MODO MINERO / FULL ---
-                print("🏭 Creando Nodo Completo (Miner)...")
-                node = NodeFactory.create_miner_node()
-                node.start() 
-            
-            cls._instance = node
-            print("✅ [API] Nodo listo.")
-            
-        except Exception as e:
-            print(f"❌ [API] Error fatal iniciando nodo: {e}")
-            raise e
-
-    @classmethod
     def shutdown(cls):
         if cls._instance:
             print("🛑 [API] Deteniendo nodo...")
-            # Si tiene método stop_mining (MinerNode), lo llamamos
             if hasattr(cls._instance, 'stop_mining'):
                 cls._instance.stop_mining() # type: ignore
             
-            # Detener red base
             if hasattr(cls._instance, 'stop'):
                 cls._instance.stop()
                 
@@ -102,7 +80,7 @@ class NodeContainer:
 
 # --- INYECCIÓN ---
 
-def get_node_dependency() -> Union[MinerNode, SPVNode]:
+def get_node_dependency() -> CoreNodeType:
     return NodeContainer.get_instance()
 
 def get_keystore_dependency() -> Keystore:

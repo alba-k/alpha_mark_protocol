@@ -14,26 +14,29 @@ logging.basicConfig(level=logging.INFO, format='[P2P] %(message)s')
 
 class P2PService(INetworkService):
     """
-    Servicio de Red P2P.
-    Orquesta la comunicación de alto nivel (JSON, Handshake) usando el ConnectionManager.
+    Servicio de Red P2P. Orquesta la comunicación de alto nivel.
     """
     
     def __init__(self, config_manager: ConfigManager):
-        # 1. Configuración Inyectada
         self.config = config_manager.network
         self.message_handler: Optional[Callable[[Dict[str, Any], str], None]] = None
         
-        # 2. Inicializamos ConnectionManager con los límites de seguridad
+        # 🔥 NUEVO: Callback para obtener la altura de la cadena
+        self._height_provider: Optional[Callable[[], int]] = None
+        
         self.connection = ConnectionManager(
             host=self.config.host,
             port=self.config.port,
-            max_connections=self.config.max_connections, # Inyección
-            max_buffer_size=self.config.max_buffer_size, # Inyección
+            max_connections=self.config.max_connections, 
+            max_buffer_size=self.config.max_buffer_size, 
             on_message_received=self._on_bytes_received
         )
 
+    def set_height_provider(self, provider: Callable[[], int]):
+        """Permite al nodo inyectar una función que devuelve la altura actual."""
+        self._height_provider = provider
+
     def start(self) -> None:
-        """Arranca el servidor y conecta a los nodos semilla."""
         self.connection.start_server()
         
         # Bootstrap: Conectar a seeds
@@ -42,33 +45,39 @@ class P2PService(INetworkService):
                 if seed:
                     try:
                         ip, port_str = seed.split(":")
-                        self.connect_to(ip, int(port_str))
+                        if int(port_str) != self.config.port:
+                            self.connect_to(ip, int(port_str))
                     except ValueError:
                         logging.error(f"[P2P] Seed inválido: {seed}")
 
     def connect_to(self, ip: str, port: int) -> bool:
-        """Conecta y envía Handshake."""
         if self.connection.connect_outbound(ip, port):
             peer_id = f"{ip}:{port}"
-            # 🔥 Iniciar protocolo inmediatamente
             self._send_handshake(peer_id)
             return True
         return False
 
     def broadcast(self, message: Dict[str, Any], exclude_peer: Optional[str] = None) -> None:
-        """Serializa y envía mensaje a todos."""
         try:
-            # Añadir timestamp de red para métricas/debug
             message["_net_t"] = int(time.time())
-            
-            # Serialización segura
             json_bytes = json.dumps(message).encode('utf-8')
-            
             self.connection.broadcast(json_bytes, exclude_peer)
             logging.debug(f"📣 Broadcast: {message.get('type')}")
-            
         except Exception as e:
             logging.error(f"[P2P] Error broadcast: {e}")
+
+    # 🔥 NUEVO: Método para enviar mensajes directos (Unicast)
+    def send_message(self, peer_id: str, message: Dict[str, Any]) -> bool:
+        """
+        [VERIFICADO] Envía un mensaje directo a un peer específico.
+        Necesario para SYNC_REQUEST y SYNC_BATCH.
+        """
+        try:
+            json_bytes = json.dumps(message).encode('utf-8')
+            return self.connection.send_direct(peer_id, json_bytes)
+        except Exception as e:
+            logging.error(f"[P2P] Error enviando mensaje directo a {peer_id}: {e}")
+            return False
 
     def register_handler(self, handler: Callable[[Dict[str, Any], str], None]) -> None:
         self.message_handler = handler
@@ -82,12 +91,19 @@ class P2PService(INetworkService):
     # --- PROTOCOLO INTERNO (Privado) ---
 
     def _send_handshake(self, peer_id: str):
-        """Envía el saludo inicial con versión."""
+        """Envía el saludo inicial con versión y altura de bloque."""
+        
+        # Obtener altura dinámica si está disponible
+        current_height = 0
+        if self._height_provider:
+            current_height = self._height_provider()
+
         handshake_msg: dict[str, Any] = {
             "type": ProtocolConstants.MSG_HANDSHAKE,
             "payload": {
                 "version": ProtocolConstants.PROTOCOL_VERSION,
                 "agent": ProtocolConstants.USER_AGENT,
+                "height": current_height,  # <--- INFORMACIÓN VITAL PARA SYNC
                 "node_id": f"{self.config.host}:{self.config.port}",
                 "timestamp": int(time.time())
             }
@@ -95,11 +111,10 @@ class P2PService(INetworkService):
         try:
             json_bytes = json.dumps(handshake_msg).encode('utf-8')
             
-            # 🔥 CORRECCIÓN APLICADA: Usar envío directo (Unicast)
             if not self.connection.send_direct(peer_id, json_bytes):
                 logging.error(f"❌ [P2P] Fallo al enviar Handshake a {peer_id}")
             else:
-                logging.info(f"🤝 [P2P] Handshake enviado a {peer_id}")
+                logging.info(f"🤝 [P2P] Handshake enviado a {peer_id} (Altura: {current_height})")
                 
         except Exception as e:
             logging.error(f"[P2P] Error Handshake: {e}")
@@ -111,22 +126,17 @@ class P2PService(INetworkService):
 
             data = json.loads(message_str)
             
-            if "type" not in data:
-                logging.warning(f"[P2P] Mensaje sin 'type' de {peer_id}")
-                return
+            if "type" not in data: return
 
             msg_type = data["type"]
 
-            # 1. Intercepción de Protocolo (Handshake)
+            # Interceptamos el Handshake y lo dejamos fluir al FullNode
             if msg_type == ProtocolConstants.MSG_HANDSHAKE:
                 logging.info(f"🤝 [P2P] Handshake recibido de {peer_id}: {data.get('payload')}")
-                return 
 
-            # 2. Enrutamiento al Negocio (GossipManager)
+            # Enrutamiento al Negocio (FullNode)
             if self.message_handler:
                 self.message_handler(data, peer_id)
-            else:
-                logging.debug(f"[P2P] Mensaje {msg_type} recibido sin handler.")
                 
         except json.JSONDecodeError:
             logging.warning(f"[P2P] ⚠️ JSON inválido de {peer_id}")

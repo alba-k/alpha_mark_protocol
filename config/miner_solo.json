@@ -1,7 +1,8 @@
 {
     "miner_name": "Jason_Miner_01",
-    "connection": {
-        "node_rpc_url": "http://127.0.0.1:9334"
+    "network": {
+        "p2p_port": 9334,
+        "seed_nodes": []
     },
     "payout": {
         "payout_address": "PRUEBA_DE_CONEXION_EXITOSA_JASON_001",

@@ -74,9 +74,12 @@ class TransactionValidator:
     # --------------------------------------------------------------------------
     @staticmethod
     def verify_scripts(transaction: Transaction, previous_outputs: Dict[int, bytes]) -> bool:
+        # ⚡ CORRECCIÓN DE SEGURIDAD (Caso 4): Fail Safe
+        # Si el motor de scripting no existe, NO podemos validar la propiedad de los fondos.
+        # Debemos rechazar la transacción por seguridad.
         if not ScriptEngine:
-            logger.warning("Motor de Scripting no disponible. Saltando validación de scripts.")
-            return True
+            logger.critical("CRÍTICO: Motor de Scripting no disponible. Rechazando validación por seguridad.")
+            return False # ANTES: return True (Inseguro - Fail Open)
 
         engine = ScriptEngine() # type: ignore
         

@@ -18,7 +18,7 @@ class ApiConfig:
     db_name: str
     debug_mode: bool
     mining_enabled: bool
-    coin_scale: int  # <--- Nuevo campo encapsulado
+    coin_scale: int 
 
     @classmethod
     def load(cls) -> 'ApiConfig':
@@ -27,7 +27,11 @@ class ApiConfig:
         """
         # 1. Leemos del entorno (Infraestructura)
         host = os.getenv("AKM_API_HOST", "0.0.0.0")
-        port = int(os.getenv("AKM_API_PORT", 8000))
+        
+        # 🔥 CORRECCIÓN CRÍTICA: Cambiamos el puerto por defecto a 8080
+        # Esto resuelve la colisión con el Dashboard (que usa 8000, 8001, 8002).
+        port = int(os.getenv("AKM_API_PORT", 8080))
+        
         title = os.getenv("AKM_API_TITLE", "Alpha Mark Protocol API")
         version = "0.1.0"
         db_name = os.getenv("AKM_DB_NAME", "api_node.db")
@@ -35,11 +39,8 @@ class ApiConfig:
         mining = os.getenv("AKM_MINING_ENABLED", "False").lower() == "true"
 
         # 2. Leemos del Núcleo (Dominio)
-        # Encapsulamos aquí la dependencia con el Core Config.
-        # Si el núcleo cambia, solo tocamos este archivo.
         try:
             core_conf = ConfigManager()
-            # Usamos getattr por seguridad si consensus no está inicializado
             scale = getattr(core_conf.consensus, 'coin_factor', 100_000_000)
         except Exception:
             scale = 100_000_000 # Fallback seguro

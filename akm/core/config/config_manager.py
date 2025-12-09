@@ -1,5 +1,6 @@
 # akm/core/config/config_manager.py
 from dotenv import load_dotenv
+from typing import Dict, Any
 
 # Cargar variables de entorno si existen
 load_dotenv()
@@ -24,13 +25,58 @@ class ConfigManager:
         return cls._instance
 
     def _initialize(self):
-        # Inicializamos los módulos especializados
+        # Inicializamos los módulos especializados con valores por defecto (Variables de Entorno)
         self._consensus = ConsensusConfig()      # Reglas del juego
         self._persistence = PersistenceConfig()  # Base de datos
         self._network = NetworkConfig()          # Puertos e IPs
         self._mining = MiningConfig()            # Dirección de minero
+        
+        # NUEVO: Variable global de aplicación para identificar el rol del nodo
+        self._node_type = "FULL" # Default (FULL, LIGHT, MINER)
+
+    # --- MÉTODO DE UNIFICACIÓN (NUEVO) ---
+    def load_from_json_dict(self, json_data: Dict[str, Any]) -> None:
+        """
+        Orquesta la carga de configuración desde el JSON completo.
+        Actualiza los componentes internos respetando el encapsulamiento.
+        """
+        # 0. Configuración Global (Raíz) - Detectar si es LIGHT o FULL
+        if "node_type" in json_data:
+            self._node_type = str(json_data["node_type"]).upper()
+
+        # 1. Red
+        if "network" in json_data:
+            self._network.update_from_dict(json_data["network"])
+
+        # 2. Persistencia
+        if "storage" in json_data:
+            self._persistence.update_from_dict(json_data["storage"])
+
+        # 3. Minería (Combinamos secciones 'payout' y 'performance' del JSON)
+        miner_updates: dict[str, Any] = {}
+        if "payout" in json_data: 
+            miner_updates.update(json_data["payout"])
+        if "performance" in json_data: 
+            miner_updates.update(json_data["performance"])
+        
+        self._mining.update_from_dict(miner_updates)
+
+        # 4. Consenso y Mempool (NUEVO)
+        # Extraemos las secciones correspondientes del JSON root
+        consensus_data = json_data.get("consensus", {})
+        mempool_data = json_data.get("mempool", {})
+        
+        # Delegamos la actualización al ConsensusConfig
+        self._consensus.update_from_dict(consensus_data, mempool_data)
+
+        # Nota: La sección 'rpc' se ignora por ahora ya que no hay módulo RPC implementado.
 
     # --- ACCESORES ORGANIZADOS ---
+
+    @property
+    def node_type(self) -> str:
+        """Tipo de nodo configurado (FULL, LIGHT, MINER)."""
+        return self._node_type
 
     @property
     def consensus(self) -> ConsensusConfig:

@@ -1,14 +1,22 @@
-import os
+# src/node.py
 import time
 import threading
-import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Any, Optional
+from typing import Optional, Any
 
-# --- CLASE PARA EL SERVIDOR WEB (DASHBOARD) ---
+# --- API INTEGRATION IMPORTS ---
+import uvicorn
+from akm.interface.api.server import app 
+from akm.interface.api.config import settings as api_settings 
+from akm.interface.api import dependencies as api_dependencies # El módulo para inyectar dependencias
+# ------------------------------
+
+# 1. Configuración
+from akm.core.config.config_manager import ConfigManager
+# 2. Fábrica
+from akm.core.factories.node_factory import NodeFactory
+
 class NodeDashboard(BaseHTTPRequestHandler):
-    # TIPADO: Definimos que esta variable puede ser un objeto 'Node' O puede ser None.
-    # Usamos comillas 'Node' porque la clase Node aún no se ha leído (Forward Reference).
     node_ref: Optional['Node'] = None 
 
     def do_GET(self) -> None:
@@ -16,91 +24,138 @@ class NodeDashboard(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         
-        # Leemos el estado actual del nodo de forma segura
-        estado: str = "DESCONOCIDO"
+        # Datos en tiempo real
+        altura = 0
+        peers = 0
+        tipo = "..."
         
-        # TIPADO: Python ahora sabe que si node_ref existe, tiene un atributo .node_type
-        if self.node_ref:
-            estado = self.node_ref.node_type
+        if self.node_ref and hasattr(self.node_ref, 'core_node'):
+            try:
+                core: Any = self.node_ref.core_node
+                
+                if hasattr(core, 'blockchain'):
+                    altura = core.blockchain.height
+                elif hasattr(core, 'header_chain'):
+                    altura = core.header_chain.height
+                
+                if hasattr(core, 'p2p_service'):
+                    peers = len(core.p2p_service.get_connected_peers())
+                
+                tipo = self.node_ref.config_manager.node_type
+            except Exception:
+                pass
 
-        # Datos seguros (si es None, ponemos '...')
-        puerto_display = self.node_ref.port if self.node_ref else '...'
-        dir_display = self.node_ref.data_dir if self.node_ref else '...'
-
-        # Creamos una página web simple en HTML
         html = f"""
         <html>
-        <head><title>AKM Dashboard</title></head>
-        <body style="font-family: Arial; background-color: #f0f0f0; text-align: center; padding: 50px;">
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); display: inline-block;">
-                <h1 style="color: #2c3e50;">ALPHA MARK PROTOCOL</h1>
+        <head>
+            <title>AKM Dashboard</title>
+            <meta http-equiv="refresh" content="5">
+        </head>
+        <body style="font-family: Arial; background: #34495e; color: white; text-align: center; padding: 50px;">
+            <div style="background: white; color: #333; padding: 30px; border-radius: 10px; display: inline-block; min-width: 300px;">
+                <h1 style="color: #16a085;">AKM {tipo} NODE</h1>
                 <hr>
-                <h2>Estado del Nodo: <span style="color: green;">EN LINEA</span></h2>
-                <p><strong>Tipo:</strong> {estado}</p>
-                <p><strong>Puerto P2P:</strong> {puerto_display}</p>
-                <p><strong>Directorio de Datos:</strong> {dir_display}</p>
-                <br>
-                <button onclick="location.reload()">Actualizar Estado</button>
+                <div style="font-size: 24px; margin: 20px 0;">
+                    <p>📦 Altura: <strong>{altura}</strong></p>
+                    <p>🔗 Peers: <strong>{peers}</strong></p>
+                </div>
+                <small>Dashboard Ligero</small>
             </div>
         </body>
         </html>
         """
         self.wfile.write(bytes(html, "utf-8"))
 
-    def log_message(self, format: str, *args: Any) -> None:
-        return # Silenciar logs
+    def log_message(self, format: str, *args: Any) -> None: return 
 
-# --- TU CLASE NODO ORIGINAL (AHORA CON TIPADO) ---
 class Node:
-    # TIPADO: Exigimos que config sea un diccionario
-    def __init__(self, config: Dict[str, Any]) -> None:
-        self.config: Dict[str, Any] = config
+    def __init__(self) -> None:
+        # 1. Configuración
+        self.config_manager = ConfigManager()
         
-        # Validamos que lo que sacamos del diccionario sea texto o usemos un default
-        self.node_type: str = str(config.get("node_type", "FULL"))
+        # 2. Asignación Inteligente de Puertos Web (Dashboard)
+        node_type = self.config_manager.node_type
+        if node_type == "FULL":
+            self.web_port = 8000
+        elif node_type == "LIGHT":
+            self.web_port = 8001
+        elif node_type == "MINER":
+            self.web_port = 8002
+        else:
+            self.web_port = 8080
         
-        # Aquí asumimos que estos datos existen en el config (podría dar error si falta en el JSON)
-        self.port: int = int(config["network"]["p2p_port"])
-        self.data_dir: str = str(config["storage"]["data_dir"])
+        # 3. Ensamblaje del Núcleo Correcto
+        print(f"[INIT] 🏭 Ensamblando nodo tipo {node_type}...")
         
-        # Configuración del Dashboard Web
-        # Lógica matemática simple
-        self.web_port: int = 8000 + (1 if self.node_type == "LIGHT" else 0)
+        self.core_node: Any = None
 
+        if node_type == "FULL":
+            self.core_node = NodeFactory.create_full_node()
+        elif node_type == "MINER":
+            self.core_node = NodeFactory.create_miner_node()
+        elif node_type == "LIGHT":
+            self.core_node = NodeFactory.create_spv_node()
+        else:
+            print(f"[WARN] Tipo desconocido {node_type}, usando FULL por defecto.")
+            self.core_node = NodeFactory.create_full_node()
+            
+        # 🔥 CRÍTICO: INYECCIÓN DE DEPENDENCIA CORREGIDA
+        # Usamos el método set_instance() de NodeContainer
+        api_dependencies.NodeContainer.set_instance(self.core_node)
+            
+    # --- MÉTODO NUEVO: Iniciar Servidor API ---
+    def _start_api_server(self) -> None:
+        """Lanza el servidor FastAPI/Uvicorn en un hilo separado."""
+        
+        # 🔥 CORRECCIÓN FINAL: Cálculo dinámico para evitar colisión de puertos API
+        base_p2p_port = 9333  # Puerto base del Full Node
+        base_api_port = 8080  # Puerto base de la API
+        
+        # dynamic_api_port: 8080 (Full), 8081 (Miner), 8082 (Light)
+        port_offset = self.config_manager.network.port - base_p2p_port
+        dynamic_api_port = base_api_port + port_offset
+        
+        host = api_settings.host
+
+        print(f"🌐 [API] Servidor listo en: http://{host}:{dynamic_api_port}")
+
+        # Iniciar Uvicorn
+        uvicorn.run(
+            app, 
+            host=host, 
+            port=dynamic_api_port, # Usamos el puerto calculado
+            log_level="warning"
+        )
+        
     def iniciar_dashboard(self) -> None:
-        """Inicia el servidor web en un hilo separado"""
-        # Conectamos las clases
         NodeDashboard.node_ref = self 
-        
-        server = HTTPServer(("localhost", self.web_port), NodeDashboard)
-        print(f"[WEB] Dashboard disponible en: http://localhost:{self.web_port}")
-        
-        # Abrir navegador automáticamente
-        webbrowser.open(f"http://localhost:{self.web_port}")
-        
-        server.serve_forever()
+        try:
+            server = HTTPServer(("localhost", self.web_port), NodeDashboard)
+            print(f"[WEB] Dashboard: http://localhost:{self.web_port}")
+            server.serve_forever()
+        except OSError:
+            print(f"[WEB] Puerto {self.web_port} ocupado. Intenta cerrar otros nodos.")
 
     def start(self) -> None:
-        print(f"\n[SISTEMA] Arrancando NODO tipo: {self.node_type}")
+        print(f"\n[SISTEMA] Arrancando Motor P2P en puerto {self.config_manager.network.port}...")
         
-        # 1. Iniciamos el Dashboard en paralelo
-        hilo_web = threading.Thread(target=self.iniciar_dashboard)
-        hilo_web.daemon = True 
-        hilo_web.start()
+        # 1. Arrancar servicios de Red (P2P)
+        if self.core_node:
+            self.core_node.start() 
+        
+        # 2. Arrancar Servidor API (para Transacciones)
+        api_thread = threading.Thread(target=self._start_api_server, daemon=True)
+        api_thread.start()
+        
+        # 3. Dashboard
+        dashboard_thread = threading.Thread(target=self.iniciar_dashboard, daemon=True)
+        dashboard_thread.start()
 
-        # 2. Lógica normal del nodo
-        if self.node_type == "LIGHT":
-            print(">>> MODO LIGERO ACTIVADO <<<")
-        else:
-            print(">>> MODO FULL NODE ACTIVADO <<<")
-
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
-
-        print("[INFO] Nodo operativo. Mira tu navegador.\n")
+        print(f">>> NODO {self.config_manager.node_type} OPERATIVO <<<")
         try:
-            # Tipado: Este bucle no retorna nada, corre por siempre
             while True:
                 time.sleep(1) 
         except KeyboardInterrupt:
-            print("Deteniendo nodo...")
+            print("\n[SHUTDOWN] Deteniendo servicios...")
+            if self.core_node:
+                self.core_node.stop()
