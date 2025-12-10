@@ -1,11 +1,17 @@
-//akm/interface/web/app.js
-const API_URL = "http://localhost:8000";
+// akm/interface/web/app.js
+
+// 🔥 CORRECCIÓN CRÍTICA: Detectar puerto automáticamente
+// Esto tomará "http://localhost:8082" si estás en el Nodo Ligero,
+// o "http://localhost:8081" si estás en el Minero.
+const API_URL = window.location.origin;
 let currentAddress = null;
+
+console.log(`🔌 Conectando a la API en: ${API_URL}`);
 
 // --- UI HELPER: Barra de Carga ---
 function setLoading(isLoading) {
     const bar = document.getElementById('loading-bar');
-    if (!bar) return; // Protección si no existe el elemento
+    if (!bar) return;
     bar.style.width = isLoading ? '70%' : '100%';
     if (!isLoading) setTimeout(() => bar.style.width = '0%', 300);
 }
@@ -21,11 +27,19 @@ async function apiCall(endpoint, method = 'GET', body = null) {
         if (body) options.body = JSON.stringify(body);
 
         const res = await fetch(`${API_URL}${endpoint}`, options);
-        const data = await res.json();
 
-        if (!res.ok) throw new Error(data.detail || 'Error desconocido');
+        // Manejo robusto de errores HTTP
+        let data;
+        try {
+            data = await res.json();
+        } catch (e) {
+            if (!res.ok) throw new Error(`Error del servidor (${res.status})`);
+        }
+
+        if (!res.ok) throw new Error(data?.detail || 'Error desconocido');
         return data;
     } catch (error) {
+        console.error(error);
         alert("❌ Error: " + error.message);
         throw error;
     } finally {
@@ -35,47 +49,70 @@ async function apiCall(endpoint, method = 'GET', body = null) {
 
 // --- LOGIC ---
 async function createWallet() {
-    const pwd = document.getElementById('create-password').value;
+    // Usamos prompt simple o tomamos del input si existe en el HTML
+    // Para compatibilidad con tu HTML, buscamos el input por ID
+    const pwdInput = document.getElementById('create-password');
+    const pwd = pwdInput ? pwdInput.value : prompt("Crea una contraseña:");
+
     if (!pwd) return alert("La contraseña es obligatoria");
 
     const data = await apiCall('/wallet/create', 'POST', { password: pwd });
     loginSuccess(data);
 
     if (data.mnemonic) {
-        document.getElementById('mnemonic-alert').classList.remove('hidden');
-        document.getElementById('mnemonic-words').innerText = data.mnemonic;
+        const alertBox = document.getElementById('mnemonic-alert');
+        if (alertBox) {
+            alertBox.classList.remove('hidden');
+            document.getElementById('mnemonic-words').innerText = data.mnemonic;
+        } else {
+            alert(`GUARDA ESTO: ${data.mnemonic}`);
+        }
     }
 }
 
 async function loadWallet() {
-    const pwd = document.getElementById('login-password').value;
+    const pwdInput = document.getElementById('login-password');
+    const pwd = pwdInput ? pwdInput.value : prompt("Contraseña:");
+
     if (!pwd) return alert("Ingresa tu contraseña");
 
     const data = await apiCall('/wallet/load', 'POST', { password: pwd });
     loginSuccess(data);
 }
 
-// CORRECCIÓN AQUÍ: Ya no dividimos por COIN_SCALE. La API ya lo hizo.
 async function refreshBalance() {
     if (!currentAddress) return;
-    const data = await apiCall(`/balance/${currentAddress}`);
+    try {
+        const data = await apiCall(`/balance/${currentAddress}`);
 
-    // data.balance ya viene como "50.0" desde la API
-    // Solo aseguramos el formato de 8 decimales
-    document.getElementById('balance-amount').innerText = data.balance.toFixed(8);
-    document.getElementById('utxo-count').innerText = data.utxo_count;
+        // data.balance ya viene en formato decimal desde el backend
+        // Aseguramos 8 decimales visuales
+        const bal = parseFloat(data.balance);
+
+        const balElement = document.getElementById('balance-amount');
+        if (balElement) balElement.innerText = bal.toFixed(8);
+
+        const utxoElement = document.getElementById('utxo-count');
+        if (utxoElement) utxoElement.innerText = data.utxo_count;
+
+    } catch (e) {
+        console.log("Esperando sincronización de saldo...");
+    }
 }
 
 async function sendTransaction() {
-    const to = document.getElementById('tx-to').value;
-    const amountInput = document.getElementById('tx-amount').value;
-    const amount = parseFloat(amountInput);
+    const toInput = document.getElementById('tx-to');
+    const amountInput = document.getElementById('tx-amount');
+
+    // Si no hay inputs en el HTML (diseño móvil), usamos prompts
+    const to = toInput ? toInput.value : prompt("Destinatario:");
+    const amountVal = amountInput ? amountInput.value : prompt("Monto:");
+    const amount = parseFloat(amountVal);
 
     if (!amount || amount <= 0) return alert("Ingresa un monto válido");
 
     if (!confirm(`¿Estás seguro de enviar ${amount} AKM?`)) return;
 
-    // Enviamos el monto tal cual (ej: 1.5). La API lo convertirá a enteros.
     const data = await apiCall('/transactions', 'POST', {
         recipient_address: to,
         amount: amount,
@@ -83,17 +120,25 @@ async function sendTransaction() {
     });
 
     alert(`✅ Transacción Exitosa\nHash: ${data.tx_hash}`);
-    document.getElementById('tx-amount').value = '';
+
+    if (amountInput) amountInput.value = '';
 
     setTimeout(refreshBalance, 2000);
 }
 
 function loginSuccess(data) {
     currentAddress = data.address;
-    document.getElementById('my-address').innerText = currentAddress;
 
-    document.getElementById('view-login').classList.add('hidden');
-    document.getElementById('view-dashboard').classList.remove('hidden');
+    const addrElement = document.getElementById('my-address');
+    if (addrElement) addrElement.innerText = currentAddress;
+
+    const loginView = document.getElementById('view-login');
+    const dashView = document.getElementById('view-dashboard');
+
+    if (loginView && dashView) {
+        loginView.classList.add('hidden');
+        dashView.classList.remove('hidden');
+    }
 
     refreshBalance();
     setInterval(refreshBalance, 5000);
@@ -109,8 +154,11 @@ async function checkNode() {
     try {
         const data = await apiCall('/status');
         const badge = document.getElementById('node-status');
+
         if (badge) {
-            badge.innerHTML = `<i class="bi bi-hdd-network-fill"></i> Bloque #${data.height}`;
+            // Mostramos si es Light o Full para claridad
+            const role = data.environment === "SPV_MOBILE" ? "Light" : "Full";
+            badge.innerHTML = `<i class="bi bi-hdd-network-fill"></i> ${role}: #${data.height}`;
             badge.className = "badge bg-success d-flex align-items-center gap-2 px-3 py-2 rounded-pill";
         }
     } catch (e) {
@@ -122,5 +170,6 @@ async function checkNode() {
     }
 }
 
+// Iniciar chequeo de estado
 checkNode();
 setInterval(checkNode, 3000);

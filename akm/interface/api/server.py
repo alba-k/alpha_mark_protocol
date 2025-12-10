@@ -3,7 +3,7 @@ import sys
 import os
 from typing import List, Dict, Any, Union
 
-# 1. AJUSTE DE RUTAS PARA IMPORTACIONES (Se mantiene tu ajuste de ruta)
+# 1. AJUSTE DE RUTAS PARA IMPORTACIONES
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '../../..'))
 if project_root not in sys.path:
@@ -24,7 +24,7 @@ from akm.interface.api.dependencies import (
 )
 from akm.interface.api.config import settings
 
-# ⚡ IMPORTACIÓN REQUERIDA: Traemos el conversor monetario seguro
+# IMPORTACIÓN REQUERIDA: Traemos el conversor monetario seguro
 from akm.core.utils.monetary import Monetary 
 
 # Imports de Core (Nodos y Managers)
@@ -37,22 +37,19 @@ from akm.infra.identity.keystore import Keystore
 # --- LIFESPAN (Ciclo de Vida CORREGIDO) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 🔥 CORRECCIÓN CRÍTICA: Eliminamos NodeContainer.initialize()
-    # El nodo es creado e inyectado por src/node.py (el lanzador) antes de que Uvicorn arranque.
-    # Esta función solo se usa para tareas de inicio y cierre de la API.
+    # CORRECCIÓN CRÍTICA: Eliminamos NodeContainer.initialize()
+    # El nodo es creado e inyectado por src/node.py antes de que Uvicorn arranque.
     
     yield # La aplicación arranca y sirve peticiones aquí
     
-    # Detención de servicios (El nodo principal se detiene desde src/node.py)
-    # Solo llamamos al shutdown del contenedor si es necesario para liberar recursos de la API.
-    # El NodeContainer.shutdown() se mantiene para liberar recursos, pero ya no arranca el nodo.
+    # Detención de servicios
     NodeContainer.shutdown()
 
 # --- APP ---
 app = FastAPI(
     title=settings.title,
     version=settings.version,
-    lifespan=lifespan, # Usamos el ciclo de vida corregido
+    lifespan=lifespan,
     debug=settings.debug_mode
 )
 
@@ -106,9 +103,8 @@ def get_status(node: Union[MinerNode, SPVNode] = Depends(get_node_dependency)) -
             height = node.blockchain.last_block.index
         node_role = "MINER_FULL"
 
-    # Conteo de Peers (Común para ambos gracias a BaseNode)
+    # Conteo de Peers
     peers = 0
-    # Es necesario el 'hasattr' check por si el nodo aún no ha terminado de inicializarse
     if hasattr(node, 'p2p') and node.p2p.connection: 
         peers = len(node.p2p.connection.get_active_peers())
     
@@ -125,8 +121,6 @@ def get_balance(address: str, node: Union[MinerNode, SPVNode] = Depends(get_node
     
     # CASO SPV: No tiene base de datos local de UTXOs
     if isinstance(node, SPVNode):
-        # El SPV no puede calcular saldo localmente sin pedirlo a la red.
-        # Retornamos 0 indicativo por ahora.
         return schemas.BalanceResponse(
             address=address,
             balance=0.0,
@@ -158,7 +152,7 @@ def get_blocks(limit: int = 10, node: Union[MinerNode, SPVNode] = Depends(get_no
     
     # CASO SPV: No tiene bloques completos con transacciones
     if isinstance(node, SPVNode):
-        return [] # Retornamos lista vacía para no romper el frontend
+        return [] 
 
     # CASO MINERO: Itera la DB
     blocks: List[schemas.BlockResponse] = []
@@ -174,7 +168,6 @@ def get_blocks(limit: int = 10, node: Union[MinerNode, SPVNode] = Depends(get_no
             nonce=current.nonce
         ))
         if current.index == 0: break
-        # Es necesario el 'get_block_by_hash' del repositorio
         current = node.blockchain.get_block_by_hash(current.previous_hash) 
         count += 1
     return blocks
@@ -225,9 +218,9 @@ def send_transaction(
     identity: Dict[str, Any] = Depends(get_identity_dependency)
 ) -> schemas.TransactionResponse:
     
-    # CASO SPV: No puede construir transacciones localmente (necesita inputs/UTXOs)
+    # CASO SPV
     if isinstance(node, SPVNode):
-        raise HTTPException(status_code=501, detail="SPV Wallet: La creación de transacciones requiere conexión a un nodo completo (Feature pendiente).")
+        raise HTTPException(status_code=501, detail="SPV Wallet: La creación de transacciones requiere conexión a un nodo completo.")
 
     # CASO MINERO
     try:
@@ -241,7 +234,6 @@ def send_transaction(
         if amount_in_albas <= 0:
             raise HTTPException(status_code=400, detail="Monto demasiado bajo.")
 
-        # Accedemos a utxo_set porque sabemos que es MinerNode (gracias al check de arriba)
         tx = wallet.create_transaction(
             recipient_address=req.recipient_address,
             amount_alba=amount_in_albas,
@@ -266,4 +258,5 @@ if __name__ == "__main__":
     import uvicorn
     print(f"🌍 Iniciando {settings.title} en puerto {settings.port}")
     print(f"💰 Factor de moneda: {settings.coin_scale}")
+    # Configuración crítica: host=settings.host lee el "0.0.0.0" de config.py
     uvicorn.run(app, host=settings.host, port=settings.port)

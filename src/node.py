@@ -31,8 +31,10 @@ class NodeDashboard(BaseHTTPRequestHandler):
         
         if self.node_ref and hasattr(self.node_ref, 'core_node'):
             try:
+                # Usamos Any para evitar errores de linter en tiempo de diseño
                 core: Any = self.node_ref.core_node
                 
+                # Verificación segura de atributos según el tipo de nodo
                 if hasattr(core, 'blockchain'):
                     altura = core.blockchain.height
                 elif hasattr(core, 'header_chain'):
@@ -99,19 +101,20 @@ class Node:
             print(f"[WARN] Tipo desconocido {node_type}, usando FULL por defecto.")
             self.core_node = NodeFactory.create_full_node()
             
-        # 🔥 CRÍTICO: INYECCIÓN DE DEPENDENCIA CORREGIDA
-        # Usamos el método set_instance() de NodeContainer
+        # 🔥 CRÍTICO: INYECCIÓN DE DEPENDENCIA (SETTER)
+        # Inyectamos la instancia creada en el contenedor de dependencias de la API
         api_dependencies.NodeContainer.set_instance(self.core_node)
             
-    # --- MÉTODO NUEVO: Iniciar Servidor API ---
+    # --- MÉTODO PARA INICIAR SERVIDOR API ---
     def _start_api_server(self) -> None:
-        """Lanza el servidor FastAPI/Uvicorn en un hilo separado."""
+        """Lanza el servidor FastAPI/Uvicorn en un puerto dinámico."""
         
-        # 🔥 CORRECCIÓN FINAL: Cálculo dinámico para evitar colisión de puertos API
+        # 🔥 CÁLCULO DINÁMICO DE PUERTO API
+        # Evita que Full Node (8080), Light Node (8082) y Miner (8081) choquen
         base_p2p_port = 9333  # Puerto base del Full Node
         base_api_port = 8080  # Puerto base de la API
         
-        # dynamic_api_port: 8080 (Full), 8081 (Miner), 8082 (Light)
+        # offset: 0 para Full, 1 para Miner, 2 para Light
         port_offset = self.config_manager.network.port - base_p2p_port
         dynamic_api_port = base_api_port + port_offset
         
@@ -123,7 +126,7 @@ class Node:
         uvicorn.run(
             app, 
             host=host, 
-            port=dynamic_api_port, # Usamos el puerto calculado
+            port=dynamic_api_port, # Usamos el puerto calculado dinámicamente
             log_level="warning"
         )
         
@@ -147,7 +150,7 @@ class Node:
         api_thread = threading.Thread(target=self._start_api_server, daemon=True)
         api_thread.start()
         
-        # 3. Dashboard
+        # 3. Dashboard Web
         dashboard_thread = threading.Thread(target=self.iniciar_dashboard, daemon=True)
         dashboard_thread.start()
 

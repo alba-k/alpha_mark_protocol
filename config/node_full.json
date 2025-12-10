@@ -8,6 +8,7 @@
     },
     "storage": {
         "data_dir": "./data/blockchain_db",
+        "wallet_file": "admin_wallet.dat",
         "prune_mode": false
     },
     "consensus": {

@@ -1,0 +1,15 @@
+[P2P] 🏭 Ensamblando Full Node...
+[P2P] 🏗️  Blockchain DB: SQLITE
+[P2P] 🔌 Conectando al archivo: ./data/blockchain_db/blockchain_oficial.db
+[P2P] 🏗️  UTXO DB: SQLITE (Optimized)
+[P2P] 📚 Hidratando estado desde 137 bloques...
+[P2P] ⚠️ UTXO Set vaciado en disco.
+[P2P] ✅ Nodo Sincronizado. Altura: 136
+[P2P] 🌐 Iniciando Nodo Base (Capa de Red)...
+[P2P] 📡 [NET] Servidor TCP activo y escuchando en 0.0.0.0:9333
+[P2P] 🔗 [NET] Nueva conexión entrante desde 127.0.0.1:37374
+[P2P] 🤝 [P2P] Handshake recibido de 127.0.0.1:37374: {'version': 1, 'agent': 'AlphaMark/1.0-Core', 'height': 0, 'node_id': '0.0.0.0:9335', 'timestamp': 1765369299}
+[P2P] 📊 Estado Peer: 0 | Mi Estado: 137
+[P2P] 🔗 [NET] Nueva conexión entrante desde 127.0.0.1:37380
+[P2P] 🤝 [P2P] Handshake recibido de 127.0.0.1:37380: {'version': 1, 'agent': 'AlphaMark/1.0-Core', 'height': 137, 'node_id': '0.0.0.0:9334', 'timestamp': 1765369303}
+[P2P] 📊 Estado Peer: 137 | Mi Estado: 137

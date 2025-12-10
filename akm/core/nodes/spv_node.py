@@ -53,7 +53,7 @@ class SPVNode(BaseNode):
             self._handle_proof_received(payload)
             
         elif msg_type == ProtocolConstants.MSG_BLOCK:
-            logging.debug("Ignorando bloque completo.")
+            logging.debug("Ignorando bloque completo (Soy SPV).")
 
     def _handle_headers_received(self, headers_data: List[Dict[str, Any]]) -> None:
         logging.info(f"📥 Recibidos {len(headers_data)} headers.")
@@ -83,25 +83,26 @@ class SPVNode(BaseNode):
 
     def _handle_proof_received(self, proof_data: Dict[str, Any]):
         """Valida matemáticamente la prueba de inclusión."""
-        tx_hash = proof_data["tx_hash"]
-        block_hash = proof_data["block_hash"]
-        merkle_root = proof_data["merkle_root"]
-        proof = proof_data["proof"]
+        tx_hash = proof_data.get("tx_hash", "")
+        block_hash = proof_data.get("block_hash", "")
+        merkle_root = proof_data.get("merkle_root", "")
+        proof = proof_data.get("proof", [])
         
         # 1. ¿Tengo ese bloque validado?
-        # ⚡ CORRECCIÓN: Usamos método público para respetar encapsulamiento
+        # Usamos el método público del HeaderChain
         local_header = self.header_chain.get_header_by_hash(block_hash)
         
         if not local_header:
-            logging.warning(f"⚠️ [SPV] Prueba para bloque desconocido {block_hash[:8]}.")
+            logging.warning(f"⚠️ [SPV] Prueba recibida para bloque desconocido {block_hash[:8]}. (¿Necesitas sincronizar?)")
             return
 
+        # 2. Verificar que la raíz coincida con mi cadena honesta
         if local_header.merkle_root != merkle_root:
-            logging.error("❌ [SPV] ALERTA: Merkle Root no coincide con Header local.")
+            logging.error("❌ [SPV] ALERTA: Merkle Root de la prueba no coincide con Header local.")
             return
 
-        # 2. Verificar Criptografía
+        # 3. Verificar Criptografía (Ruta de Merkle)
         if MerkleTreeBuilder.verify_proof(tx_hash, merkle_root, proof):
-            logging.info(f"✅ [SPV] PAGO CONFIRMADO: {tx_hash[:8]} es auténtico.")
+            logging.info(f"✅ [SPV] PAGO CONFIRMADO: {tx_hash[:8]} está matemáticamente probado en el bloque #{local_header.index}.")
         else:
             logging.error(f"❌ [SPV] PRUEBA FALLIDA: La TX no genera la raíz del bloque.")

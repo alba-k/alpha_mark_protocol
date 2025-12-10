@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any, Union
 # Imports de Capa Core
 from akm.core.nodes.miner_node import MinerNode
 from akm.core.nodes.spv_node import SPVNode 
+# Import de Configuración Central
+from akm.core.config.config_manager import ConfigManager # <--- NECESARIO
 
 # Imports de Infraestructura (Keystore)
 from akm.infra.identity.keystore import Keystore
@@ -11,41 +13,44 @@ from akm.infra.identity.keystore import Keystore
 # Imports de Interface
 from akm.interface.api.config import settings
 
-# Definimos el tipo base para facilitar la lectura
+# Definimos el tipo base
 CoreNodeType = Union[MinerNode, SPVNode] 
 
 class NodeContainer:
     """
     Service Container (Singleton).
-    Gestiona el ciclo de vida del nodo activo (Inyección de Dependencias).
+    Gestiona el ciclo de vida del nodo activo y sus dependencias de identidad.
     """
-    _instance: Optional[CoreNodeType] = None # Soporte Polimórfico
+    _instance: Optional[CoreNodeType] = None 
     _keystore: Optional[Keystore] = None
     _active_identity: Optional[Dict[str, Any]] = None
 
     @classmethod
     def get_instance(cls) -> CoreNodeType:
-        """Acceso a la instancia del nodo activo."""
         if cls._instance is None:
             raise RuntimeError("El nodo no ha sido inicializado. Ejecute set_instance() primero.")
         return cls._instance
 
     @classmethod
     def set_instance(cls, node_instance: CoreNodeType):
-        """
-        🔥 NUEVA FUNCIÓN: Inyección de Dependencia (Setter).
-        Permite a src/node.py (el lanzador) inyectar el CoreNode ya creado.
-        """
         if cls._instance is not None: return
         cls._instance = node_instance
         print("✅ [API-DI] Instancia de nodo inyectada correctamente.")
 
-    # [El resto de métodos get_keystore, get_active_identity, set_active_identity, y shutdown se mantienen]
-    
     @classmethod
     def get_keystore(cls) -> Keystore:
+        """
+        Obtiene el Keystore configurado para este nodo específico.
+        """
         if cls._keystore is None:
-            cls._keystore = Keystore(filepath="node_wallet.dat")
+            # 🔥 MEJORA: Leer configuración dinámica en lugar de hardcode
+            config = ConfigManager()
+            wallet_file = config.persistence.wallet_filename
+            
+            # Inicializamos el Keystore con el archivo específico de este nodo
+            cls._keystore = Keystore(filepath=wallet_file)
+            print(f"🔑 [API] Keystore inicializado: {wallet_file}")
+            
         return cls._keystore
 
     @classmethod
@@ -58,7 +63,7 @@ class NodeContainer:
     def set_active_identity(cls, identity: Dict[str, Any]):
         cls._active_identity = identity
         
-        # Solo reaccionamos si es un Minero (SPV no mina)
+        # Reactivar minería si corresponde
         if cls._instance and isinstance(cls._instance, MinerNode):
             address = identity.get('address')
             if address and settings.mining_enabled:

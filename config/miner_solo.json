@@ -1,14 +1,26 @@
 {
-    "miner_name": "Jason_Miner_01",
+    "node_type": "MINER",
     "network": {
+        "network_id": "akm_mainnet",
         "p2p_port": 9334,
-        "seed_nodes": []
+        "max_peers": 50,
+        "seed_nodes": [
+            "127.0.0.1:9333"
+        ]
+    },
+    "storage": {
+        "data_dir": "./data/miner_db",
+        "wallet_file": "miner_wallet.dat",
+        "prune_mode": false
+    },
+    "consensus": {
+        "block_time_target_sec": 60
     },
     "payout": {
-        "payout_address": "PRUEBA_DE_CONEXION_EXITOSA_JASON_001",
-        "coinbase_message": "Mined by Alpha Mark Protocol"
+        "payout_address": "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+        "coinbase_message": "Mined by AKM Node 2"
     },
     "performance": {
-        "threads": 4
+        "threads": 1
     }
 }

@@ -26,9 +26,10 @@ class ApiConfig:
         Factory Method: Centraliza la lógica de carga de configuración.
         """
         # 1. Leemos del entorno (Infraestructura)
+        # CORRECCIÓN PARA WSL: "0.0.0.0" permite conexiones externas (desde Windows)
         host = os.getenv("AKM_API_HOST", "0.0.0.0")
         
-        # 🔥 CORRECCIÓN CRÍTICA: Cambiamos el puerto por defecto a 8080
+        # CORRECCIÓN CRÍTICA: Cambiamos el puerto por defecto a 8080
         # Esto resuelve la colisión con el Dashboard (que usa 8000, 8001, 8002).
         port = int(os.getenv("AKM_API_PORT", 8080))
         

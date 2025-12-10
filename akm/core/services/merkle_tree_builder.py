@@ -45,7 +45,6 @@ class MerkleTreeBuilder:
         if target_tx_hash not in tx_hashes:
             return None
             
-        # ⚡ CORRECCIÓN DE TIPADO: Declaración explícita
         proof: List[str] = []
         
         try:
@@ -59,18 +58,20 @@ class MerkleTreeBuilder:
             if len(current_level) % 2 != 0:
                 current_level.append(current_level[-1])
                 
-            # ⚡ CORRECCIÓN DE TIPADO: Declaración explícita
-            next_level: List[str] = []
-            
-            # Identificar vecino
+            # Lógica de hermano (Merkle Sibling)
             is_right_child = (idx % 2 != 0)
             sibling_idx = idx - 1 if is_right_child else idx + 1
             
             sibling_hash = current_level[sibling_idx]
-            direction = "L" if is_right_child else "R" # Si soy hijo derecho, mi hermano está a la Izquierda
+            
+            # Guardamos dirección para reconstruir: L|HASH o R|HASH
+            # Si soy hijo derecho, necesito concatenar con mi hermano IZQUIERDO (L)
+            # Si soy hijo izquierdo, necesito concatenar con mi hermano DERECHO (R)
+            direction = "L" if is_right_child else "R" 
             proof.append(f"{direction}|{sibling_hash}")
             
             # Subir de nivel
+            next_level: List[str] = []
             for i in range(0, len(current_level), 2):
                 left = current_level[i]
                 right = current_level[i+1]
@@ -93,9 +94,9 @@ class MerkleTreeBuilder:
         for item in proof:
             direction, sibling_hash = item.split('|')
             
-            if direction == "L": # Vecino a la izquierda
+            if direction == "L": # El hermano está a la Izquierda
                 combined = sibling_hash + current_hash
-            else:                # Vecino a la derecha
+            else:                # El hermano está a la Derecha
                 combined = current_hash + sibling_hash
                 
             current_hash = CryptoUtility.double_sha256(combined)

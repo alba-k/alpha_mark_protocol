@@ -15,6 +15,7 @@
     },
     "storage": {
         "data_dir": "./data/headers_db",
+        "wallet_file": "user_wallet.dat",
         "prune_mode": true
     }
 }

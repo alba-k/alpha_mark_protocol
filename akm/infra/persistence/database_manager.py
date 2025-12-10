@@ -1,6 +1,7 @@
 # akm/infra/persistence/database_manager.py
 import sqlite3
 import logging
+import os
 from akm.core.config.config_manager import ConfigManager
 
 class DatabaseManager:
@@ -14,8 +15,20 @@ class DatabaseManager:
 
     def _initialize(self):
         config = ConfigManager()
-        self.db_path = config.persistence.db_name
         
+        # ✅ CORRECCIÓN CRÍTICA: Usar la ruta completa (db_path)
+        # Esto incluye el directorio data_dir específico de cada nodo
+        self.db_path = config.persistence.db_path 
+        
+        # Asegurar que el directorio exista antes de conectar
+        directory = os.path.dirname(self.db_path)
+        if directory and not os.path.exists(directory):
+            try:
+                os.makedirs(directory, exist_ok=True)
+                logging.info(f"📂 Directorio creado: {directory}")
+            except OSError as e:
+                logging.error(f"❌ Error creando directorio DB: {e}")
+            
         logging.info(f"🔌 Conectando al archivo: {self.db_path}")
 
         self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
@@ -23,7 +36,8 @@ class DatabaseManager:
 
     def _create_tables(self):
         cursor = self.conn.cursor()
-        # Tabla de Bloques
+        
+        # 1. Tabla de Bloques
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS blocks (
                 block_index INTEGER PRIMARY KEY,
@@ -38,6 +52,20 @@ class DatabaseManager:
         ''')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_hash ON blocks(block_hash)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_prev_hash ON blocks(previous_hash)')
+        
+        # 2. Tabla de UTXOs (Necesaria para el sistema de saldos)
+        # Sin esta tabla, el repositorio de UTXO fallaría
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS utxos (
+                tx_hash TEXT,
+                output_index INTEGER,
+                amount INTEGER,
+                address BLOB, 
+                PRIMARY KEY (tx_hash, output_index)
+            )
+        ''')
+        cursor.execute('CREATE INDEX IF NOT EXISTS idx_utxo_address ON utxos (address)')
+        
         self.conn.commit()
 
     def get_connection(self):
