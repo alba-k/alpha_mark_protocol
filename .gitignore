@@ -1,0 +1,17 @@
+# Entorno Virtual
+venv/
+.venv/
+env/
+
+# Archivos de Python compilados
+__pycache__/
+*.pyc
+*.pyd
+*.so
+
+# Bases de datos y archivos de datos temporales
+*.sqlite
+*.db
+*.json
+data/
+results/
