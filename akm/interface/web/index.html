@@ -1,0 +1,206 @@
+<!-- akm/interface/web/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Mark | Wallet</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div id="loading-bar"></div>
+
+    <nav class="navbar navbar-dark mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <svg class="gothic-logo" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3zm0 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" color="#d500f9" />
+                    <circle cx="12" cy="14" r="7" stroke="#7c4dff" opacity="0.5" />
+                </svg>
+                <span class="brand-text d-none d-sm-inline">Alpha Mark Protocol</span>
+                <span class="brand-text d-inline d-sm-none">AKM</span>
+            </a>
+
+            <span id="node-status" class="badge bg-secondary d-flex align-items-center gap-2 px-3 py-2 rounded-pill">
+                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                Conectando...
+            </span>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div id="view-login" class="row justify-content-center animate-fade-in">
+            <div class="col-md-6 col-lg-5">
+                <div class="card p-4">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-wallet2 fs-1 text-primary"></i>
+                        <h3 class="mt-2 fw-bold">Billetera SPV</h3>
+                        <p class="text-muted small">Acceso seguro y descentralizado</p>
+                    </div>
+
+                    <ul class="nav nav-tabs nav-fill mb-4" id="authTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab"
+                                data-bs-target="#tab-load">Acceder</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-create">Crear
+                                Nueva</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-load">
+                            <form onsubmit="event.preventDefault(); loadWallet()">
+                                <div class="mb-4">
+                                    <label class="form-label small text-uppercase fw-bold text-muted">Contraseña</label>
+                                    <input type="password" id="login-password" class="form-control"
+                                        placeholder="••••••••" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    <i class="bi bi-unlock me-2"></i> Desbloquear
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-create">
+                            <div class="alert alert-info d-flex align-items-center gap-2 p-2 mb-3 small">
+                                <i class="bi bi-shield-lock"></i> Se generará un archivo cifrado localmente.
+                            </div>
+                            <form onsubmit="event.preventDefault(); createWallet()">
+                                <div class="mb-4">
+                                    <label class="form-label small text-uppercase fw-bold text-muted">Nueva
+                                        Contraseña</label>
+                                    <input type="password" id="create-password" class="form-control"
+                                        placeholder="Mínimo 8 caracteres" required minlength="8">
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 py-2">
+                                    <i class="bi bi-magic me-2"></i> Generar Billetera
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dashboard" class="hidden animate-fade-in">
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-5">
+                    <div class="card h-100 border-0 balance-card"
+                        style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div class="balance-container">
+                                <h6 class="text-secondary text-uppercase mb-2">Saldo Disponible</h6>
+                                <div class="d-flex align-items-baseline flex-wrap">
+                                    <h1 class="display-5 fw-bold mb-0 text-white balance-amount me-2"
+                                        id="balance-amount">0.00000000</h1>
+                                    <span class="text-primary fw-bold fs-4 balance-symbol">AKM</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end mt-4">
+                                <small class="text-muted">UTXOs Disponibles: <span id="utxo-count"
+                                        class="text-white fw-bold">0</span></small>
+                                <button onclick="refreshBalance()"
+                                    class="btn btn-outline-light btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
+                                    title="Actualizar Saldo">
+                                    <i class="bi bi-arrow-clockwise"></i> <span class="d-none d-sm-inline">Sync</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="card h-100">
+                        <div class="card-body p-4">
+                            <h6 class="text-secondary text-uppercase mb-3">Tu Dirección de Recepción</h6>
+                            <div class="d-flex align-items-center gap-2 mb-4">
+                                <div class="wallet-address text-break flex-grow-1" id="my-address">Cargando...</div>
+                                <button class="btn btn-dark border border-secondary" onclick="copyAddress()"
+                                    title="Copiar al portapapeles">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+
+                            <div id="mnemonic-alert" class="alert alert-danger hidden border-0 shadow-sm">
+                                <div class="d-flex gap-2 mb-2 text-danger">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <strong>¡IMPORTANTE! COPIA DE SEGURIDAD</strong>
+                                </div>
+                                <p class="small mb-2 text-white-50">Guarda estas 12 palabras en un lugar seguro. Son la
+                                    única forma de recuperar tus fondos.</p>
+                                <code id="mnemonic-words"
+                                    class="d-block p-3 rounded bg-black text-success user-select-all small border border-success text-center">...</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <h5 class="mb-0 fw-bold text-white"><i class="bi bi-send me-2 text-primary"></i>Enviar
+                                Fondos</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form onsubmit="event.preventDefault(); sendTransaction();">
+                                <div class="row g-4">
+                                    <div class="col-md-8">
+                                        <label
+                                            class="form-label text-secondary small text-uppercase fw-bold">Destinatario</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-dark border-secondary text-secondary"><i
+                                                    class="bi bi-qr-code"></i></span>
+                                            <input type="text" id="tx-to" class="form-control form-control-lg"
+                                                placeholder="Dirección AKM..." required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label
+                                            class="form-label text-secondary small text-uppercase fw-bold">Monto</label>
+                                        <div class="input-group">
+                                            <input type="number" id="tx-amount" class="form-control form-control-lg"
+                                                placeholder="0.00" min="0.00000001" step="0.00000001" required>
+                                            <span
+                                                class="input-group-text bg-dark border-secondary text-white">AKM</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <small class="text-muted">Comisión de red: <span class="text-white">0.00001
+                                                    AKM</span></small>
+                                        </div>
+                                        <button type="submit"
+                                            class="btn btn-primary w-100 py-3 fw-bold fs-5 shadow-neon">
+                                            CONFIRMAR ENVÍO <i class="bi bi-arrow-right-short ms-2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

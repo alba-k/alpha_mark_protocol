@@ -1,0 +1,694 @@
+2025-12-14 16:13:17,246 [INFO] [root]: 🔧 Configurando entorno para: nodo_maestro
+2025-12-14 16:13:17,248 [INFO] [akm.core.factories.node_factory]: 🏭 NodeFactory: Solicitud de creación para rol 'FULL_NODE'
+2025-12-14 16:13:17,248 [INFO] [akm.core.factories.node_factory]: Fabricando Full Node (Servidor de Validación)...
+2025-12-14 16:13:17,248 [INFO] [akm.infra.persistence.repository_factory]: 🏗️  Blockchain DB: SQLITE
+2025-12-14 16:13:17,248 [INFO] [akm.infra.persistence.database_manager]: 🔌 Conectando al archivo: C:\Users\Mauricio\Desktop\project\alpha_mark_protocol\data\blockchain\blockchain_full.db
+2025-12-14 16:13:17,294 [INFO] [akm.infra.persistence.repository_factory]: 🏗️  UTXO DB: SQLITE (Optimized)
+2025-12-14 16:13:17,294 [INFO] [akm.core.models.blockchain]: 🚀 Sistema iniciado. Altura actual: -1
+2025-12-14 16:13:17,294 [INFO] [akm.core.managers.utxo_set]: Gestor UTXO (Estado) iniciado.
+2025-12-14 16:13:17,294 [INFO] [akm.infra.network.connection_manager]: Gestor de conexiones TCP preparado.
+2025-12-14 16:13:17,294 [INFO] [akm.infra.network.p2p_service]: ✅ Servicio P2P inicializado en 0.0.0.0:6000
+2025-12-14 16:13:17,294 [INFO] [akm.core.managers.gossip_manager]: ✅ Gestor de difusión (Gossip) activo.
+2025-12-14 16:13:17,294 [INFO] [akm.core.consensus.subsidy_calculator]: Calculador de subsidios activo.
+2025-12-14 16:13:17,294 [INFO] [akm.core.consensus.subsidy_calculator]: Calculador de subsidios activo.
+2025-12-14 16:13:17,294 [INFO] [akm.core.managers.chain_reorg_manager]: Gestor de reorgs activo.
+2025-12-14 16:13:17,294 [INFO] [akm.core.managers.consensus_orchestrator]: Cerebro de consenso iniciado.
+2025-12-14 16:13:17,294 [INFO] [akm.core.nodes.base_node]: Servicios de Nodo Base inicializados.
+2025-12-14 16:13:17,294 [WARNING] [akm.core.nodes.full_node]: ⚠️ Blockchain vacía. Creando Génesis...
+2025-12-14 16:13:17,294 [INFO] [akm.core.factories.genesis_block_factory]: 🌌 Iniciando creación del Bloque Génesis...
+2025-12-14 16:13:17,294 [INFO] [akm.core.factories.genesis_block_factory]: TX Génesis sellada: 50ed68df...
+2025-12-14 16:13:17,294 [INFO] [akm.core.factories.genesis_block_factory]: 🔨 Minando Génesis (Dificultad: 207fffff)...
+2025-12-14 16:13:17,294 [INFO] [akm.core.factories.genesis_block_factory]: ✅ ¡Génesis Minado! Hash: 064cea54a5... | Nonce: 2083236894
+2025-12-14 16:13:17,294 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 0 verificada.
+2025-12-14 16:13:17,294 [INFO] [akm.core.validators.block_rules_validator]: Bloque 064cea54a52ea0b262e4d045b055cf1c296c0751978a53a3a1e4b071173f1137 verificado.
+2025-12-14 16:13:17,294 [INFO] [akm.core.managers.consensus_orchestrator]: 🌟 Bloque Génesis aceptado. Cadena iniciada.
+2025-12-14 16:13:17,309 [INFO] [akm.core.models.blockchain]: ✅ Bloque #0 guardado en DB permanentemente.
+2025-12-14 16:13:17,309 [INFO] [akm.core.nodes.full_node]: 🌍 GÉNESIS CREADO: 064cea54a52ea0b2...
+2025-12-14 16:13:17,309 [INFO] [akm.core.nodes.full_node]: ✅ Nodo Sincronizado. Altura actual: 0
+2025-12-14 16:13:17,309 [INFO] [akm.core.nodes.full_node]: 🟢 FullNode inicializado y listo para la red.
+2025-12-14 16:13:17,309 [INFO] [akm.core.factories.node_factory]: Full Node ensamblado.
+2025-12-14 16:13:17,309 [INFO] [akm.core.nodes.base_node]: 🌐 Iniciando servicios de red...
+2025-12-14 16:13:17,311 [INFO] [akm.infra.network.connection_manager]: TCPServer: Escuchando en 0.0.0.0:6000
+2025-12-14 16:13:17,311 [INFO] [root]: ✅ Nodo FULL_NODE corriendo exitosamente.
+2025-12-14 16:24:50,671 [INFO] [akm.infra.network.connection_manager]: NET: +1 Par conectado: 192.168.0.31:56582
+2025-12-14 16:24:50,676 [INFO] [akm.infra.network.p2p_service]: 🤝 Handshake recibido de 192.168.0.31:56582 | Altura: 0 | Ver: 1
+2025-12-14 16:24:50,941 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 1 verificada.
+2025-12-14 16:24:50,941 [INFO] [akm.core.validators.block_rules_validator]: Bloque 7befec2a69c40190eb4aee34cdc38da4b76f2b1a1967185a3a1207f95fb4026c verificado.
+2025-12-14 16:24:50,951 [INFO] [akm.core.models.blockchain]: ✅ Bloque #1 guardado en DB permanentemente.
+2025-12-14 16:24:50,951 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #1 unido a la cadena.
+2025-12-14 16:24:50,951 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #1 aceptado y propagado.
+2025-12-14 16:24:50,951 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:51,181 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 2 verificada.
+2025-12-14 16:24:51,181 [INFO] [akm.core.validators.block_rules_validator]: Bloque 6e14248d05020a95cd06b13d5156d2366fe47f709d58a40fb029d9aa3a8c4ccd verificado.
+2025-12-14 16:24:51,191 [INFO] [akm.core.models.blockchain]: ✅ Bloque #2 guardado en DB permanentemente.
+2025-12-14 16:24:51,191 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #2 unido a la cadena.
+2025-12-14 16:24:51,191 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #2 aceptado y propagado.
+2025-12-14 16:24:51,191 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:51,476 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 3 verificada.
+2025-12-14 16:24:51,476 [INFO] [akm.core.validators.block_rules_validator]: Bloque 360dc78ea8d8a4d776bd3c0620d2f374394d9934f2031034b94679e1965c1abb verificado.
+2025-12-14 16:24:51,492 [INFO] [akm.core.models.blockchain]: ✅ Bloque #3 guardado en DB permanentemente.
+2025-12-14 16:24:51,492 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #3 unido a la cadena.
+2025-12-14 16:24:51,492 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #3 aceptado y propagado.
+2025-12-14 16:24:51,492 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:51,916 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 4 verificada.
+2025-12-14 16:24:51,916 [INFO] [akm.core.validators.block_rules_validator]: Bloque 3f8f19dfcdc082ac3a2cd5e7bb7de0e6cff8925daf645a02578daff717c20edd verificado.
+2025-12-14 16:24:51,931 [INFO] [akm.core.models.blockchain]: ✅ Bloque #4 guardado en DB permanentemente.
+2025-12-14 16:24:51,931 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #4 unido a la cadena.
+2025-12-14 16:24:51,931 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #4 aceptado y propagado.
+2025-12-14 16:24:51,931 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:52,041 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 5 verificada.
+2025-12-14 16:24:52,041 [INFO] [akm.core.validators.block_rules_validator]: Bloque 25a9b1d746a0f889fd276848b6039e42acd8df2108a7dc1f381fec061048dfd2 verificado.
+2025-12-14 16:24:52,053 [INFO] [akm.core.models.blockchain]: ✅ Bloque #5 guardado en DB permanentemente.
+2025-12-14 16:24:52,053 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #5 unido a la cadena.
+2025-12-14 16:24:52,053 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #5 aceptado y propagado.
+2025-12-14 16:24:52,053 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:52,293 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 6 verificada.
+2025-12-14 16:24:52,293 [INFO] [akm.core.validators.block_rules_validator]: Bloque 59c0a141fca4e0ec0bdb2fa925f2f3f9d371f52b98da579bc603a646eb214eac verificado.
+2025-12-14 16:24:52,317 [INFO] [akm.core.models.blockchain]: ✅ Bloque #6 guardado en DB permanentemente.
+2025-12-14 16:24:52,318 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #6 unido a la cadena.
+2025-12-14 16:24:52,318 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #6 aceptado y propagado.
+2025-12-14 16:24:52,318 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:52,607 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 7 verificada.
+2025-12-14 16:24:52,607 [INFO] [akm.core.validators.block_rules_validator]: Bloque 7a7890a77bdcfa6fb5948c45f13a1aaa51778847673650882bf2608a763f907e verificado.
+2025-12-14 16:24:52,621 [INFO] [akm.core.models.blockchain]: ✅ Bloque #7 guardado en DB permanentemente.
+2025-12-14 16:24:52,621 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #7 unido a la cadena.
+2025-12-14 16:24:52,622 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #7 aceptado y propagado.
+2025-12-14 16:24:52,622 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:52,921 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 8 verificada.
+2025-12-14 16:24:52,921 [INFO] [akm.core.validators.block_rules_validator]: Bloque 53e499b221cb4d3895b4b1c368300353faf46b8b7181391089874cc44cc301ca verificado.
+2025-12-14 16:24:52,931 [INFO] [akm.core.models.blockchain]: ✅ Bloque #8 guardado en DB permanentemente.
+2025-12-14 16:24:52,931 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #8 unido a la cadena.
+2025-12-14 16:24:52,931 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #8 aceptado y propagado.
+2025-12-14 16:24:52,931 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:53,485 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 9 verificada.
+2025-12-14 16:24:53,485 [INFO] [akm.core.validators.block_rules_validator]: Bloque 59689d8da3a60d3572fca82f3339f39cb895e0f7a8646cef89354776de5498e3 verificado.
+2025-12-14 16:24:53,491 [INFO] [akm.core.models.blockchain]: ✅ Bloque #9 guardado en DB permanentemente.
+2025-12-14 16:24:53,491 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #9 unido a la cadena.
+2025-12-14 16:24:53,491 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #9 aceptado y propagado.
+2025-12-14 16:24:53,491 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:53,796 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 10 verificada.
+2025-12-14 16:24:53,796 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0aa18c907742489c811741933d1ec5c1899f69409a440563300c0af008599d1d verificado.
+2025-12-14 16:24:53,802 [INFO] [akm.core.models.blockchain]: ✅ Bloque #10 guardado en DB permanentemente.
+2025-12-14 16:24:53,802 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #10 unido a la cadena.
+2025-12-14 16:24:53,802 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #10 aceptado y propagado.
+2025-12-14 16:24:53,802 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:54,251 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 11 verificada.
+2025-12-14 16:24:54,251 [INFO] [akm.core.validators.block_rules_validator]: Bloque 38e05a58f0ae6291895bcf7552bf46221ada3769a49a4600ebbb5e97600fa624 verificado.
+2025-12-14 16:24:54,261 [INFO] [akm.core.models.blockchain]: ✅ Bloque #11 guardado en DB permanentemente.
+2025-12-14 16:24:54,261 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #11 unido a la cadena.
+2025-12-14 16:24:54,261 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #11 aceptado y propagado.
+2025-12-14 16:24:54,261 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:54,583 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 12 verificada.
+2025-12-14 16:24:54,583 [INFO] [akm.core.validators.block_rules_validator]: Bloque 5b49957fb54d77dd379fba6a878bceb9ce7ce46e7c46ec7b909bc6cfe51a9254 verificado.
+2025-12-14 16:24:54,598 [INFO] [akm.core.models.blockchain]: ✅ Bloque #12 guardado en DB permanentemente.
+2025-12-14 16:24:54,598 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #12 unido a la cadena.
+2025-12-14 16:24:54,598 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #12 aceptado y propagado.
+2025-12-14 16:24:54,598 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:54,838 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 13 verificada.
+2025-12-14 16:24:54,838 [INFO] [akm.core.validators.block_rules_validator]: Bloque 4c47bed9bb15fef8011cc70fdfb4c131c0f89f0fdb55d39ca4a8136429dc2c36 verificado.
+2025-12-14 16:24:54,846 [INFO] [akm.core.models.blockchain]: ✅ Bloque #13 guardado en DB permanentemente.
+2025-12-14 16:24:54,846 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #13 unido a la cadena.
+2025-12-14 16:24:54,846 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #13 aceptado y propagado.
+2025-12-14 16:24:54,846 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:55,090 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 14 verificada.
+2025-12-14 16:24:55,090 [INFO] [akm.core.validators.block_rules_validator]: Bloque 73a4d84d04cb98226c4dba26a66f7f84c71892b66a61aa0bb55fb9e422af4852 verificado.
+2025-12-14 16:24:55,102 [INFO] [akm.core.models.blockchain]: ✅ Bloque #14 guardado en DB permanentemente.
+2025-12-14 16:24:55,104 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #14 unido a la cadena.
+2025-12-14 16:24:55,104 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #14 aceptado y propagado.
+2025-12-14 16:24:55,104 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:55,376 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 15 verificada.
+2025-12-14 16:24:55,376 [INFO] [akm.core.validators.block_rules_validator]: Bloque 2459954dff8f8b3021a18dda8b33bc5727f787793e453acf3e0107b7185f0c8b verificado.
+2025-12-14 16:24:55,386 [INFO] [akm.core.models.blockchain]: ✅ Bloque #15 guardado en DB permanentemente.
+2025-12-14 16:24:55,386 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #15 unido a la cadena.
+2025-12-14 16:24:55,386 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #15 aceptado y propagado.
+2025-12-14 16:24:55,386 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:55,841 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 16 verificada.
+2025-12-14 16:24:55,841 [INFO] [akm.core.validators.block_rules_validator]: Bloque 103431c567c958b6e5dc072d53d8639ba5ce8d6b1a35b8ebf62494d12a65c547 verificado.
+2025-12-14 16:24:55,851 [INFO] [akm.core.models.blockchain]: ✅ Bloque #16 guardado en DB permanentemente.
+2025-12-14 16:24:55,851 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #16 unido a la cadena.
+2025-12-14 16:24:55,851 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #16 aceptado y propagado.
+2025-12-14 16:24:55,851 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:55,941 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 17 verificada.
+2025-12-14 16:24:55,941 [INFO] [akm.core.validators.block_rules_validator]: Bloque 69b01e311ff7fe8f4550dd402cd36b73cbc9db0311f3f0f518b97ac38accdc13 verificado.
+2025-12-14 16:24:55,946 [INFO] [akm.core.models.blockchain]: ✅ Bloque #17 guardado en DB permanentemente.
+2025-12-14 16:24:55,946 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #17 unido a la cadena.
+2025-12-14 16:24:55,951 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #17 aceptado y propagado.
+2025-12-14 16:24:55,951 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:56,323 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 18 verificada.
+2025-12-14 16:24:56,323 [INFO] [akm.core.validators.block_rules_validator]: Bloque 7de7ad924dd042362cb22ca09590c38c1244fcc5ab4dd47f672b24d45d6dd43c verificado.
+2025-12-14 16:24:56,333 [INFO] [akm.core.models.blockchain]: ✅ Bloque #18 guardado en DB permanentemente.
+2025-12-14 16:24:56,334 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #18 unido a la cadena.
+2025-12-14 16:24:56,334 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #18 aceptado y propagado.
+2025-12-14 16:24:56,334 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:56,639 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 19 verificada.
+2025-12-14 16:24:56,639 [INFO] [akm.core.validators.block_rules_validator]: Bloque 1e7535b3a23f182fd0442ec061a627bdd60cdaae9aa8082132c0757cf8ccebcc verificado.
+2025-12-14 16:24:56,648 [INFO] [akm.core.models.blockchain]: ✅ Bloque #19 guardado en DB permanentemente.
+2025-12-14 16:24:56,649 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #19 unido a la cadena.
+2025-12-14 16:24:56,649 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #19 aceptado y propagado.
+2025-12-14 16:24:56,649 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:56,920 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 20 verificada.
+2025-12-14 16:24:56,920 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0fd8bf4e16b56e29b5b61188226dcc350b9739c76a4eeda2a386828e7d3847fd verificado.
+2025-12-14 16:24:56,929 [INFO] [akm.core.models.blockchain]: ✅ Bloque #20 guardado en DB permanentemente.
+2025-12-14 16:24:56,929 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #20 unido a la cadena.
+2025-12-14 16:24:56,929 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #20 aceptado y propagado.
+2025-12-14 16:24:56,929 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:57,260 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 21 verificada.
+2025-12-14 16:24:57,260 [INFO] [akm.core.validators.block_rules_validator]: Bloque 1c7240e8daaf54a77f71b9fd5a101292fa3a075b5bfdfe58449c39007d8667a0 verificado.
+2025-12-14 16:24:57,261 [INFO] [akm.core.models.blockchain]: ✅ Bloque #21 guardado en DB permanentemente.
+2025-12-14 16:24:57,261 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #21 unido a la cadena.
+2025-12-14 16:24:57,261 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #21 aceptado y propagado.
+2025-12-14 16:24:57,261 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:57,481 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 22 verificada.
+2025-12-14 16:24:57,481 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0fe535ddbc7766b7a6d9c87314ac8cfb383757b66fb7f50554f192085d4b85a3 verificado.
+2025-12-14 16:24:57,493 [INFO] [akm.core.models.blockchain]: ✅ Bloque #22 guardado en DB permanentemente.
+2025-12-14 16:24:57,493 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #22 unido a la cadena.
+2025-12-14 16:24:57,493 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #22 aceptado y propagado.
+2025-12-14 16:24:57,493 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:57,799 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 23 verificada.
+2025-12-14 16:24:57,801 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0402cccf8f29fe2b661479ff61bee656755f0876509be6539db716d8e3065fab verificado.
+2025-12-14 16:24:57,811 [INFO] [akm.core.models.blockchain]: ✅ Bloque #23 guardado en DB permanentemente.
+2025-12-14 16:24:57,811 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #23 unido a la cadena.
+2025-12-14 16:24:57,811 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #23 aceptado y propagado.
+2025-12-14 16:24:57,811 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:58,197 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 24 verificada.
+2025-12-14 16:24:58,197 [INFO] [akm.core.validators.block_rules_validator]: Bloque 1c783d0c1be2ede89a134d9868fd237721181db40b4b130a261d636f8cadbd0c verificado.
+2025-12-14 16:24:58,205 [INFO] [akm.core.models.blockchain]: ✅ Bloque #24 guardado en DB permanentemente.
+2025-12-14 16:24:58,205 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #24 unido a la cadena.
+2025-12-14 16:24:58,205 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #24 aceptado y propagado.
+2025-12-14 16:24:58,205 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:58,553 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 25 verificada.
+2025-12-14 16:24:58,553 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0c9d3b4e91b505b4d6815a6fd9a46d3504ce24f3c5087063525d908f1d634949 verificado.
+2025-12-14 16:24:58,563 [INFO] [akm.core.models.blockchain]: ✅ Bloque #25 guardado en DB permanentemente.
+2025-12-14 16:24:58,563 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #25 unido a la cadena.
+2025-12-14 16:24:58,563 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #25 aceptado y propagado.
+2025-12-14 16:24:58,563 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:58,828 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 26 verificada.
+2025-12-14 16:24:58,828 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0bde14cfb96bf8bff415d7dad3fa8a1877777bcdaa387c87eee38d0e597c88f4 verificado.
+2025-12-14 16:24:58,836 [INFO] [akm.core.models.blockchain]: ✅ Bloque #26 guardado en DB permanentemente.
+2025-12-14 16:24:58,836 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #26 unido a la cadena.
+2025-12-14 16:24:58,836 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #26 aceptado y propagado.
+2025-12-14 16:24:58,836 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:59,077 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 27 verificada.
+2025-12-14 16:24:59,077 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0b8468c17f629a5edd48b75c1ffe8e0579a3c028eea5e8dcfbf41cae764311f8 verificado.
+2025-12-14 16:24:59,094 [INFO] [akm.core.models.blockchain]: ✅ Bloque #27 guardado en DB permanentemente.
+2025-12-14 16:24:59,094 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #27 unido a la cadena.
+2025-12-14 16:24:59,094 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #27 aceptado y propagado.
+2025-12-14 16:24:59,094 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:24:59,491 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 28 verificada.
+2025-12-14 16:24:59,491 [INFO] [akm.core.validators.block_rules_validator]: Bloque 13116e0b3e9efe60b36294c8e214589a18c915fedc25165d39db0517698c1ba6 verificado.
+2025-12-14 16:24:59,499 [INFO] [akm.core.models.blockchain]: ✅ Bloque #28 guardado en DB permanentemente.
+2025-12-14 16:24:59,500 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #28 unido a la cadena.
+2025-12-14 16:24:59,500 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #28 aceptado y propagado.
+2025-12-14 16:24:59,500 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:00,163 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 29 verificada.
+2025-12-14 16:25:00,163 [INFO] [akm.core.validators.block_rules_validator]: Bloque 09a398132b9b83d2069ea5a76248c58a08a23cfc849ea4295484590ecec49beb verificado.
+2025-12-14 16:25:00,179 [INFO] [akm.core.models.blockchain]: ✅ Bloque #29 guardado en DB permanentemente.
+2025-12-14 16:25:00,179 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #29 unido a la cadena.
+2025-12-14 16:25:00,179 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #29 aceptado y propagado.
+2025-12-14 16:25:00,179 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:00,493 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 30 verificada.
+2025-12-14 16:25:00,493 [INFO] [akm.core.validators.block_rules_validator]: Bloque 07bc56294e39404036bfb99db18d23f68e99950e24af7f9f71700f3e870cef6c verificado.
+2025-12-14 16:25:00,505 [INFO] [akm.core.models.blockchain]: ✅ Bloque #30 guardado en DB permanentemente.
+2025-12-14 16:25:00,505 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #30 unido a la cadena.
+2025-12-14 16:25:00,505 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #30 aceptado y propagado.
+2025-12-14 16:25:00,505 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:01,011 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 31 verificada.
+2025-12-14 16:25:01,011 [INFO] [akm.core.validators.block_rules_validator]: Bloque 02c0276135fe307cd9e6f2b0c9de42c3cc494d6d8abdcb45157aac12f6a04d5d verificado.
+2025-12-14 16:25:01,021 [INFO] [akm.core.models.blockchain]: ✅ Bloque #31 guardado en DB permanentemente.
+2025-12-14 16:25:01,022 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #31 unido a la cadena.
+2025-12-14 16:25:01,022 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #31 aceptado y propagado.
+2025-12-14 16:25:01,022 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:01,455 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 32 verificada.
+2025-12-14 16:25:01,455 [INFO] [akm.core.validators.block_rules_validator]: Bloque 05ef4ad5c71b054e2bc657e146448866bdadc911826622a8be72372192511035 verificado.
+2025-12-14 16:25:01,463 [INFO] [akm.core.models.blockchain]: ✅ Bloque #32 guardado en DB permanentemente.
+2025-12-14 16:25:01,464 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #32 unido a la cadena.
+2025-12-14 16:25:01,464 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #32 aceptado y propagado.
+2025-12-14 16:25:01,464 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:02,025 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 33 verificada.
+2025-12-14 16:25:02,025 [INFO] [akm.core.validators.block_rules_validator]: Bloque 02cdc7fd4e9f3a1ee0dc5815ce1b9c1c9047873f7ec00a3a6558ffa5d5b9c900 verificado.
+2025-12-14 16:25:02,038 [INFO] [akm.core.models.blockchain]: ✅ Bloque #33 guardado en DB permanentemente.
+2025-12-14 16:25:02,039 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #33 unido a la cadena.
+2025-12-14 16:25:02,039 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #33 aceptado y propagado.
+2025-12-14 16:25:02,039 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:02,521 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 34 verificada.
+2025-12-14 16:25:02,521 [INFO] [akm.core.validators.block_rules_validator]: Bloque 026e53a407d8f9c9e9ffa4ffd5819a21ef46fa8ba7d985780e7b1122eb99bbe8 verificado.
+2025-12-14 16:25:02,532 [INFO] [akm.core.models.blockchain]: ✅ Bloque #34 guardado en DB permanentemente.
+2025-12-14 16:25:02,532 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #34 unido a la cadena.
+2025-12-14 16:25:02,532 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #34 aceptado y propagado.
+2025-12-14 16:25:02,532 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:02,851 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 35 verificada.
+2025-12-14 16:25:02,851 [INFO] [akm.core.validators.block_rules_validator]: Bloque 036d4c0cb6c506c7441b7a14814781294de75de51bf0aea29c60bb2569b05d46 verificado.
+2025-12-14 16:25:02,866 [INFO] [akm.core.models.blockchain]: ✅ Bloque #35 guardado en DB permanentemente.
+2025-12-14 16:25:02,866 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #35 unido a la cadena.
+2025-12-14 16:25:02,866 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #35 aceptado y propagado.
+2025-12-14 16:25:02,866 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:03,319 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 36 verificada.
+2025-12-14 16:25:03,319 [INFO] [akm.core.validators.block_rules_validator]: Bloque 01cfc24353af1f195830271bb59afeda6ba71a46fbabe9c86e456bbbef90482f verificado.
+2025-12-14 16:25:03,328 [INFO] [akm.core.models.blockchain]: ✅ Bloque #36 guardado en DB permanentemente.
+2025-12-14 16:25:03,328 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #36 unido a la cadena.
+2025-12-14 16:25:03,328 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #36 aceptado y propagado.
+2025-12-14 16:25:03,330 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:03,715 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 37 verificada.
+2025-12-14 16:25:03,716 [INFO] [akm.core.validators.block_rules_validator]: Bloque 02546f8e8656b0fdb26be9c5e679612a60c27335f1549f14eb5380b5a1e5423b verificado.
+2025-12-14 16:25:03,731 [INFO] [akm.core.models.blockchain]: ✅ Bloque #37 guardado en DB permanentemente.
+2025-12-14 16:25:03,731 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #37 unido a la cadena.
+2025-12-14 16:25:03,731 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #37 aceptado y propagado.
+2025-12-14 16:25:03,731 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:04,161 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 38 verificada.
+2025-12-14 16:25:04,161 [INFO] [akm.core.validators.block_rules_validator]: Bloque 053a156e6091d2f39489618f524e0937e61ca182c08892dcb105c1da95db0753 verificado.
+2025-12-14 16:25:04,177 [INFO] [akm.core.models.blockchain]: ✅ Bloque #38 guardado en DB permanentemente.
+2025-12-14 16:25:04,177 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #38 unido a la cadena.
+2025-12-14 16:25:04,177 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #38 aceptado y propagado.
+2025-12-14 16:25:04,177 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:04,565 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 39 verificada.
+2025-12-14 16:25:04,565 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0610b8ba5cb76d18f3b57ace1b28a334f6e13e1ef8f6c898057b952dfa180203 verificado.
+2025-12-14 16:25:04,575 [INFO] [akm.core.models.blockchain]: ✅ Bloque #39 guardado en DB permanentemente.
+2025-12-14 16:25:04,575 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #39 unido a la cadena.
+2025-12-14 16:25:04,575 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #39 aceptado y propagado.
+2025-12-14 16:25:04,575 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:05,031 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 40 verificada.
+2025-12-14 16:25:05,031 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00683f225932211e4fa2c99fb95474ec3a6fd25c5a6bf8f2087bd723809be6dd verificado.
+2025-12-14 16:25:05,061 [INFO] [akm.core.models.blockchain]: ✅ Bloque #40 guardado en DB permanentemente.
+2025-12-14 16:25:05,061 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #40 unido a la cadena.
+2025-12-14 16:25:05,061 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #40 aceptado y propagado.
+2025-12-14 16:25:05,061 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:05,386 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 41 verificada.
+2025-12-14 16:25:05,388 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00358acc7c7297c9fea8f64d57fb1b4e978162b549e697a34f4239fed08e3867 verificado.
+2025-12-14 16:25:05,402 [INFO] [akm.core.models.blockchain]: ✅ Bloque #41 guardado en DB permanentemente.
+2025-12-14 16:25:05,402 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #41 unido a la cadena.
+2025-12-14 16:25:05,402 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #41 aceptado y propagado.
+2025-12-14 16:25:05,403 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:05,746 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 42 verificada.
+2025-12-14 16:25:05,746 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00b94c69b2ae95426a557ac26908500f4cac9035ed57d2e03d8dd5bce0c1e045 verificado.
+2025-12-14 16:25:05,756 [INFO] [akm.core.models.blockchain]: ✅ Bloque #42 guardado en DB permanentemente.
+2025-12-14 16:25:05,756 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #42 unido a la cadena.
+2025-12-14 16:25:05,756 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #42 aceptado y propagado.
+2025-12-14 16:25:05,756 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:06,231 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 43 verificada.
+2025-12-14 16:25:06,231 [INFO] [akm.core.validators.block_rules_validator]: Bloque 017430e04f001ab68499fd0cf591d79a90e9fb90c3fa9ba59d4c85911c9e5491 verificado.
+2025-12-14 16:25:06,246 [INFO] [akm.core.models.blockchain]: ✅ Bloque #43 guardado en DB permanentemente.
+2025-12-14 16:25:06,246 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #43 unido a la cadena.
+2025-12-14 16:25:06,246 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #43 aceptado y propagado.
+2025-12-14 16:25:06,246 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:06,566 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 44 verificada.
+2025-12-14 16:25:06,566 [INFO] [akm.core.validators.block_rules_validator]: Bloque 01dbbb18bb9bd696732d8f3f495a4b7eb1879935b35d2640481c9c3804a98afb verificado.
+2025-12-14 16:25:06,581 [INFO] [akm.core.models.blockchain]: ✅ Bloque #44 guardado en DB permanentemente.
+2025-12-14 16:25:06,581 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #44 unido a la cadena.
+2025-12-14 16:25:06,581 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #44 aceptado y propagado.
+2025-12-14 16:25:06,581 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:07,007 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 45 verificada.
+2025-12-14 16:25:07,007 [INFO] [akm.core.validators.block_rules_validator]: Bloque 008b6fc6f73d06846522b2a3553d9c1b5f78116f2bdb678538c755a8dc48e167 verificado.
+2025-12-14 16:25:07,016 [INFO] [akm.core.models.blockchain]: ✅ Bloque #45 guardado en DB permanentemente.
+2025-12-14 16:25:07,016 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #45 unido a la cadena.
+2025-12-14 16:25:07,016 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #45 aceptado y propagado.
+2025-12-14 16:25:07,016 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:07,361 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 46 verificada.
+2025-12-14 16:25:07,361 [INFO] [akm.core.validators.block_rules_validator]: Bloque 01a17d27341bd3efb2adaf90a92a69fd2ede01b02cae2c19a9e7a31bd666ed1a verificado.
+2025-12-14 16:25:07,371 [INFO] [akm.core.models.blockchain]: ✅ Bloque #46 guardado en DB permanentemente.
+2025-12-14 16:25:07,371 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #46 unido a la cadena.
+2025-12-14 16:25:07,371 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #46 aceptado y propagado.
+2025-12-14 16:25:07,371 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:07,818 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 47 verificada.
+2025-12-14 16:25:07,818 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0192c3686c2d32b333dad43d2a0b9681a1d08f5f18d3cf8e9ad5ab925cefe8b5 verificado.
+2025-12-14 16:25:07,828 [INFO] [akm.core.models.blockchain]: ✅ Bloque #47 guardado en DB permanentemente.
+2025-12-14 16:25:07,828 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #47 unido a la cadena.
+2025-12-14 16:25:07,828 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #47 aceptado y propagado.
+2025-12-14 16:25:07,828 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:08,281 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 48 verificada.
+2025-12-14 16:25:08,282 [INFO] [akm.core.validators.block_rules_validator]: Bloque 009dc4a4f86e82017cd7dcd53d30121485ff77fcebdff7ca97d9f8f9df571593 verificado.
+2025-12-14 16:25:08,300 [INFO] [akm.core.models.blockchain]: ✅ Bloque #48 guardado en DB permanentemente.
+2025-12-14 16:25:08,300 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #48 unido a la cadena.
+2025-12-14 16:25:08,300 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #48 aceptado y propagado.
+2025-12-14 16:25:08,300 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:08,709 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 49 verificada.
+2025-12-14 16:25:08,709 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0182e542a7d00f77e949c44075f915554db1b9fef174a634f0ccb787007a51f8 verificado.
+2025-12-14 16:25:08,724 [INFO] [akm.core.models.blockchain]: ✅ Bloque #49 guardado en DB permanentemente.
+2025-12-14 16:25:08,724 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #49 unido a la cadena.
+2025-12-14 16:25:08,724 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #49 aceptado y propagado.
+2025-12-14 16:25:08,724 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:09,161 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 50 verificada.
+2025-12-14 16:25:09,161 [INFO] [akm.core.validators.block_rules_validator]: Bloque 002e6a396dd88adc0b7457e4d4df791dcc86935f36989218ef32742ebd14e12b verificado.
+2025-12-14 16:25:09,176 [INFO] [akm.core.models.blockchain]: ✅ Bloque #50 guardado en DB permanentemente.
+2025-12-14 16:25:09,176 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #50 unido a la cadena.
+2025-12-14 16:25:09,176 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #50 aceptado y propagado.
+2025-12-14 16:25:09,176 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:09,723 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 51 verificada.
+2025-12-14 16:25:09,723 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0049c369c291f1cf9728c209a7d812ed1d70ccba58d39be1bd2b8a97a25a9f95 verificado.
+2025-12-14 16:25:09,739 [INFO] [akm.core.models.blockchain]: ✅ Bloque #51 guardado en DB permanentemente.
+2025-12-14 16:25:09,739 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #51 unido a la cadena.
+2025-12-14 16:25:09,739 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #51 aceptado y propagado.
+2025-12-14 16:25:09,739 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:10,306 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 52 verificada.
+2025-12-14 16:25:10,306 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00255a93b99ecc1e0da1f7a50558b30733c991375e3244362896e861e2aad0fe verificado.
+2025-12-14 16:25:10,316 [INFO] [akm.core.models.blockchain]: ✅ Bloque #52 guardado en DB permanentemente.
+2025-12-14 16:25:10,316 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #52 unido a la cadena.
+2025-12-14 16:25:10,316 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #52 aceptado y propagado.
+2025-12-14 16:25:10,316 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:10,693 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 53 verificada.
+2025-12-14 16:25:10,693 [INFO] [akm.core.validators.block_rules_validator]: Bloque 007b61e7de69626bc4e55ae819e14c8c1c5189e19de8589c39ff2befefd02ece verificado.
+2025-12-14 16:25:10,701 [INFO] [akm.core.models.blockchain]: ✅ Bloque #53 guardado en DB permanentemente.
+2025-12-14 16:25:10,701 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #53 unido a la cadena.
+2025-12-14 16:25:10,701 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #53 aceptado y propagado.
+2025-12-14 16:25:10,701 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:10,942 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 54 verificada.
+2025-12-14 16:25:10,942 [INFO] [akm.core.validators.block_rules_validator]: Bloque 006aae6638633fd2101e8ed85fd5e94c5d5631b05b6fd1ec26c6274bad1bf7bd verificado.
+2025-12-14 16:25:10,951 [INFO] [akm.core.models.blockchain]: ✅ Bloque #54 guardado en DB permanentemente.
+2025-12-14 16:25:10,951 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #54 unido a la cadena.
+2025-12-14 16:25:10,951 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #54 aceptado y propagado.
+2025-12-14 16:25:10,952 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:11,186 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 55 verificada.
+2025-12-14 16:25:11,186 [INFO] [akm.core.validators.block_rules_validator]: Bloque 001cad41a412502c91ba56f7e3ccba0d6bfc6d5ceb0f15b882c8406e60198f85 verificado.
+2025-12-14 16:25:11,199 [INFO] [akm.core.models.blockchain]: ✅ Bloque #55 guardado en DB permanentemente.
+2025-12-14 16:25:11,199 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #55 unido a la cadena.
+2025-12-14 16:25:11,199 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #55 aceptado y propagado.
+2025-12-14 16:25:11,199 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:11,525 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 56 verificada.
+2025-12-14 16:25:11,525 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00524276e0896fb7b89c9e99f27b23b60d976adeceae2a6f0aa88baf124043f9 verificado.
+2025-12-14 16:25:11,534 [INFO] [akm.core.models.blockchain]: ✅ Bloque #56 guardado en DB permanentemente.
+2025-12-14 16:25:11,534 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #56 unido a la cadena.
+2025-12-14 16:25:11,534 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #56 aceptado y propagado.
+2025-12-14 16:25:11,534 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:11,779 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 57 verificada.
+2025-12-14 16:25:11,779 [INFO] [akm.core.validators.block_rules_validator]: Bloque 003b64e8e409a0ad44529d218e90b9059bf4649936308866075cfeaa0be5b335 verificado.
+2025-12-14 16:25:11,786 [INFO] [akm.core.models.blockchain]: ✅ Bloque #57 guardado en DB permanentemente.
+2025-12-14 16:25:11,786 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #57 unido a la cadena.
+2025-12-14 16:25:11,786 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #57 aceptado y propagado.
+2025-12-14 16:25:11,786 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:12,100 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 58 verificada.
+2025-12-14 16:25:12,100 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00270abd082119cdf5045da1118ca87bdc4f4aa7a267b1102b60940687c460c7 verificado.
+2025-12-14 16:25:12,116 [INFO] [akm.core.models.blockchain]: ✅ Bloque #58 guardado en DB permanentemente.
+2025-12-14 16:25:12,116 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #58 unido a la cadena.
+2025-12-14 16:25:12,116 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #58 aceptado y propagado.
+2025-12-14 16:25:12,116 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:12,321 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 59 verificada.
+2025-12-14 16:25:12,321 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0012d295b8708e07b4cd343d66a499d30f1e89ceaa1be9befbc1afa06e7e2655 verificado.
+2025-12-14 16:25:12,332 [INFO] [akm.core.models.blockchain]: ✅ Bloque #59 guardado en DB permanentemente.
+2025-12-14 16:25:12,332 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #59 unido a la cadena.
+2025-12-14 16:25:12,332 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #59 aceptado y propagado.
+2025-12-14 16:25:12,332 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:12,691 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 60 verificada.
+2025-12-14 16:25:12,691 [INFO] [akm.core.validators.block_rules_validator]: Bloque 001d797e82c75c5ba0b13f34291f5318eb4f4a14d9c8371028919ad1558a2c2b verificado.
+2025-12-14 16:25:12,709 [INFO] [akm.core.models.blockchain]: ✅ Bloque #60 guardado en DB permanentemente.
+2025-12-14 16:25:12,709 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #60 unido a la cadena.
+2025-12-14 16:25:12,709 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #60 aceptado y propagado.
+2025-12-14 16:25:12,709 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:12,913 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 61 verificada.
+2025-12-14 16:25:12,914 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00117f4023fd474f31578712c48bcf3dee660e440e170403f5606bc033af3342 verificado.
+2025-12-14 16:25:12,928 [INFO] [akm.core.models.blockchain]: ✅ Bloque #61 guardado en DB permanentemente.
+2025-12-14 16:25:12,928 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #61 unido a la cadena.
+2025-12-14 16:25:12,928 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #61 aceptado y propagado.
+2025-12-14 16:25:12,928 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:13,161 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 62 verificada.
+2025-12-14 16:25:13,161 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00107ed91a0917e1cfd3fdc241c41c23d316dce9ebe29febc55cc1c3fe4164d5 verificado.
+2025-12-14 16:25:13,175 [INFO] [akm.core.models.blockchain]: ✅ Bloque #62 guardado en DB permanentemente.
+2025-12-14 16:25:13,175 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #62 unido a la cadena.
+2025-12-14 16:25:13,175 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #62 aceptado y propagado.
+2025-12-14 16:25:13,175 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:13,568 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 63 verificada.
+2025-12-14 16:25:13,568 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000b9baa28ec14696a5bde5f448439d7971b34fe318b2d5ff9d9c0bbb289143 verificado.
+2025-12-14 16:25:13,582 [INFO] [akm.core.models.blockchain]: ✅ Bloque #63 guardado en DB permanentemente.
+2025-12-14 16:25:13,583 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #63 unido a la cadena.
+2025-12-14 16:25:13,583 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #63 aceptado y propagado.
+2025-12-14 16:25:13,583 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:13,935 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 64 verificada.
+2025-12-14 16:25:13,935 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000b9d13022da97c1e0ef6b9844d89b2d1b8280afb2e5d4171e24a517dc5cea5 verificado.
+2025-12-14 16:25:13,943 [INFO] [akm.core.models.blockchain]: ✅ Bloque #64 guardado en DB permanentemente.
+2025-12-14 16:25:13,943 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #64 unido a la cadena.
+2025-12-14 16:25:13,943 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #64 aceptado y propagado.
+2025-12-14 16:25:13,943 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:14,211 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 65 verificada.
+2025-12-14 16:25:14,211 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000627a243f3a397bce718dd2775a7d54d8744b8a97e6d50a7e89dbfa4bf34e7 verificado.
+2025-12-14 16:25:14,222 [INFO] [akm.core.models.blockchain]: ✅ Bloque #65 guardado en DB permanentemente.
+2025-12-14 16:25:14,222 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #65 unido a la cadena.
+2025-12-14 16:25:14,222 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #65 aceptado y propagado.
+2025-12-14 16:25:14,222 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:14,466 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 66 verificada.
+2025-12-14 16:25:14,466 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0014e2e0a590607e605046097d61bfcb2d8c36f3c75f3c13b44604aed3686967 verificado.
+2025-12-14 16:25:14,482 [INFO] [akm.core.models.blockchain]: ✅ Bloque #66 guardado en DB permanentemente.
+2025-12-14 16:25:14,482 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #66 unido a la cadena.
+2025-12-14 16:25:14,482 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #66 aceptado y propagado.
+2025-12-14 16:25:14,482 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:14,887 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 67 verificada.
+2025-12-14 16:25:14,887 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0008dfbba80a9fc3a3a1b1b0cecb4b5aa1c2cb6b417f2ee7164a13763bc5ce04 verificado.
+2025-12-14 16:25:14,897 [INFO] [akm.core.models.blockchain]: ✅ Bloque #67 guardado en DB permanentemente.
+2025-12-14 16:25:14,897 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #67 unido a la cadena.
+2025-12-14 16:25:14,897 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #67 aceptado y propagado.
+2025-12-14 16:25:14,897 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:15,178 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 68 verificada.
+2025-12-14 16:25:15,178 [INFO] [akm.core.validators.block_rules_validator]: Bloque 001483d8ca0ec2537024644eb931c3ef6034554bb62f3ada765710591885d37c verificado.
+2025-12-14 16:25:15,184 [INFO] [akm.core.models.blockchain]: ✅ Bloque #68 guardado en DB permanentemente.
+2025-12-14 16:25:15,184 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #68 unido a la cadena.
+2025-12-14 16:25:15,184 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #68 aceptado y propagado.
+2025-12-14 16:25:15,184 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:15,484 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 69 verificada.
+2025-12-14 16:25:15,484 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0012d9b90b05a063c5f4a387318af48a439ab7243fa840776239fbcf77f7f6a5 verificado.
+2025-12-14 16:25:15,498 [INFO] [akm.core.models.blockchain]: ✅ Bloque #69 guardado en DB permanentemente.
+2025-12-14 16:25:15,498 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #69 unido a la cadena.
+2025-12-14 16:25:15,498 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #69 aceptado y propagado.
+2025-12-14 16:25:15,498 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:15,791 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 70 verificada.
+2025-12-14 16:25:15,791 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000407770956788710fdd7393c672e70656a0008857178ecd189ee2ced96795 verificado.
+2025-12-14 16:25:15,798 [INFO] [akm.core.models.blockchain]: ✅ Bloque #70 guardado en DB permanentemente.
+2025-12-14 16:25:15,801 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #70 unido a la cadena.
+2025-12-14 16:25:15,801 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #70 aceptado y propagado.
+2025-12-14 16:25:15,801 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:16,258 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 71 verificada.
+2025-12-14 16:25:16,258 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0006804daafed54cc995d4ff7590d429ccdcda4205ea2120b1a162908d46cecf verificado.
+2025-12-14 16:25:16,272 [INFO] [akm.core.models.blockchain]: ✅ Bloque #71 guardado en DB permanentemente.
+2025-12-14 16:25:16,272 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #71 unido a la cadena.
+2025-12-14 16:25:16,272 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #71 aceptado y propagado.
+2025-12-14 16:25:16,272 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:16,941 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 72 verificada.
+2025-12-14 16:25:16,941 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0003335452e6a9c6ce56e58585df5da7b75ab6d7a387cd1d23c24bc34a331021 verificado.
+2025-12-14 16:25:16,961 [INFO] [akm.core.models.blockchain]: ✅ Bloque #72 guardado en DB permanentemente.
+2025-12-14 16:25:16,961 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #72 unido a la cadena.
+2025-12-14 16:25:16,961 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #72 aceptado y propagado.
+2025-12-14 16:25:16,962 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:18,056 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 73 verificada.
+2025-12-14 16:25:18,056 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0006d07c905561d6ca12546da79a597155a09fd0bd6c18c1cf7cd5b0b3344d97 verificado.
+2025-12-14 16:25:18,065 [INFO] [akm.core.models.blockchain]: ✅ Bloque #73 guardado en DB permanentemente.
+2025-12-14 16:25:18,065 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #73 unido a la cadena.
+2025-12-14 16:25:18,065 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #73 aceptado y propagado.
+2025-12-14 16:25:18,065 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:18,067 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 74 verificada.
+2025-12-14 16:25:18,067 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0007a9ef6c0d3e9348cdb7759da0bf1fba84cd27ac3c9c91c390afcfb120f701 verificado.
+2025-12-14 16:25:18,075 [INFO] [akm.core.models.blockchain]: ✅ Bloque #74 guardado en DB permanentemente.
+2025-12-14 16:25:18,075 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #74 unido a la cadena.
+2025-12-14 16:25:18,075 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #74 aceptado y propagado.
+2025-12-14 16:25:18,075 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:18,075 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 75 verificada.
+2025-12-14 16:25:18,075 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0004c654e35ef3ef49157786d1da3c5fa74c500da5ae75ee68aa627919cb43e4 verificado.
+2025-12-14 16:25:18,081 [INFO] [akm.core.models.blockchain]: ✅ Bloque #75 guardado en DB permanentemente.
+2025-12-14 16:25:18,081 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #75 unido a la cadena.
+2025-12-14 16:25:18,081 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #75 aceptado y propagado.
+2025-12-14 16:25:18,081 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:18,511 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 76 verificada.
+2025-12-14 16:25:18,511 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00006a7a45fa2b56f1e398c17b37080b0723ed74eb8be55989f5e4aac3971b8d verificado.
+2025-12-14 16:25:18,521 [INFO] [akm.core.models.blockchain]: ✅ Bloque #76 guardado en DB permanentemente.
+2025-12-14 16:25:18,521 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #76 unido a la cadena.
+2025-12-14 16:25:18,521 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #76 aceptado y propagado.
+2025-12-14 16:25:18,521 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:18,695 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 77 verificada.
+2025-12-14 16:25:18,696 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000047af830a3d674ef47fbf59627fdb36f42564078bdee8e79a50a2657baad5 verificado.
+2025-12-14 16:25:18,711 [INFO] [akm.core.models.blockchain]: ✅ Bloque #77 guardado en DB permanentemente.
+2025-12-14 16:25:18,712 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #77 unido a la cadena.
+2025-12-14 16:25:18,712 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #77 aceptado y propagado.
+2025-12-14 16:25:18,712 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:19,015 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 78 verificada.
+2025-12-14 16:25:19,015 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000645f3a39614f9341226940c062fe0310b00ef2ca8cfd23bf8fa35df787067 verificado.
+2025-12-14 16:25:19,029 [INFO] [akm.core.models.blockchain]: ✅ Bloque #78 guardado en DB permanentemente.
+2025-12-14 16:25:19,029 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #78 unido a la cadena.
+2025-12-14 16:25:19,029 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #78 aceptado y propagado.
+2025-12-14 16:25:19,030 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:19,356 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 79 verificada.
+2025-12-14 16:25:19,356 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0002b4e2c530fdcf6c599141489a3237591f20e8d5545fb80413f5f9da3eefae verificado.
+2025-12-14 16:25:19,365 [INFO] [akm.core.models.blockchain]: ✅ Bloque #79 guardado en DB permanentemente.
+2025-12-14 16:25:19,365 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #79 unido a la cadena.
+2025-12-14 16:25:19,365 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #79 aceptado y propagado.
+2025-12-14 16:25:19,365 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:19,724 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 80 verificada.
+2025-12-14 16:25:19,724 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0001e7e6829ae1f0f4bf3a8c4926aadce0259cb7ec3d5997d9dbe22a913bfcd5 verificado.
+2025-12-14 16:25:19,731 [INFO] [akm.core.models.blockchain]: ✅ Bloque #80 guardado en DB permanentemente.
+2025-12-14 16:25:19,731 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #80 unido a la cadena.
+2025-12-14 16:25:19,731 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #80 aceptado y propagado.
+2025-12-14 16:25:19,731 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:20,533 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 81 verificada.
+2025-12-14 16:25:20,533 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000a5259289409806d72f5f60521ff5497fe47ebb8bbc61ed958631355fa09c verificado.
+2025-12-14 16:25:20,545 [INFO] [akm.core.models.blockchain]: ✅ Bloque #81 guardado en DB permanentemente.
+2025-12-14 16:25:20,546 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #81 unido a la cadena.
+2025-12-14 16:25:20,546 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #81 aceptado y propagado.
+2025-12-14 16:25:20,546 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:21,584 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 82 verificada.
+2025-12-14 16:25:21,584 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000fb16c962732fa1b4603bc065af0de8b565e5be5865fada96ab20d578431c verificado.
+2025-12-14 16:25:21,601 [INFO] [akm.core.models.blockchain]: ✅ Bloque #82 guardado en DB permanentemente.
+2025-12-14 16:25:21,606 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #82 unido a la cadena.
+2025-12-14 16:25:21,606 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #82 aceptado y propagado.
+2025-12-14 16:25:21,606 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:22,337 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 83 verificada.
+2025-12-14 16:25:22,337 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00013037817de22bd8d36273d47779a9b2c02a9bf33b09224fffc5d91613d770 verificado.
+2025-12-14 16:25:22,347 [INFO] [akm.core.models.blockchain]: ✅ Bloque #83 guardado en DB permanentemente.
+2025-12-14 16:25:22,347 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #83 unido a la cadena.
+2025-12-14 16:25:22,347 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #83 aceptado y propagado.
+2025-12-14 16:25:22,347 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:22,381 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 84 verificada.
+2025-12-14 16:25:22,381 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000f6513c4defb0b4766ce976f1e3c1911b253ab66b038bc285f94c88aeea7e verificado.
+2025-12-14 16:25:22,392 [INFO] [akm.core.models.blockchain]: ✅ Bloque #84 guardado en DB permanentemente.
+2025-12-14 16:25:22,392 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #84 unido a la cadena.
+2025-12-14 16:25:22,392 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #84 aceptado y propagado.
+2025-12-14 16:25:22,392 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:22,885 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 85 verificada.
+2025-12-14 16:25:22,885 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00017a0e8cafdabbdede408ff5bd338cb4dfeb1484590b92ae5576bc859b1178 verificado.
+2025-12-14 16:25:22,891 [INFO] [akm.core.models.blockchain]: ✅ Bloque #85 guardado en DB permanentemente.
+2025-12-14 16:25:22,891 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #85 unido a la cadena.
+2025-12-14 16:25:22,891 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #85 aceptado y propagado.
+2025-12-14 16:25:22,891 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:23,745 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 86 verificada.
+2025-12-14 16:25:23,745 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000038a8fcdcebe76671f8edee89a2b035beeb491b9156fd2d486db84485dfd6 verificado.
+2025-12-14 16:25:23,755 [INFO] [akm.core.models.blockchain]: ✅ Bloque #86 guardado en DB permanentemente.
+2025-12-14 16:25:23,755 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #86 unido a la cadena.
+2025-12-14 16:25:23,755 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #86 aceptado y propagado.
+2025-12-14 16:25:23,755 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:24,661 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 87 verificada.
+2025-12-14 16:25:24,661 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00006ba2192ba05e593202f49d7f9b2e028fd48bef241b92815e77d534062572 verificado.
+2025-12-14 16:25:24,671 [INFO] [akm.core.models.blockchain]: ✅ Bloque #87 guardado en DB permanentemente.
+2025-12-14 16:25:24,671 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #87 unido a la cadena.
+2025-12-14 16:25:24,671 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #87 aceptado y propagado.
+2025-12-14 16:25:24,671 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:25,540 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 88 verificada.
+2025-12-14 16:25:25,540 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00005d00b224d832b48819b9f380c71c9ee2a2efc890f0117225d376ba1fe6fe verificado.
+2025-12-14 16:25:25,549 [INFO] [akm.core.models.blockchain]: ✅ Bloque #88 guardado en DB permanentemente.
+2025-12-14 16:25:25,549 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #88 unido a la cadena.
+2025-12-14 16:25:25,549 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #88 aceptado y propagado.
+2025-12-14 16:25:25,549 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:25,805 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 89 verificada.
+2025-12-14 16:25:25,806 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0001b3c54b53d4373268403a2f237f521ac75f35c728be728456249c56d7e61e verificado.
+2025-12-14 16:25:25,814 [INFO] [akm.core.models.blockchain]: ✅ Bloque #89 guardado en DB permanentemente.
+2025-12-14 16:25:25,814 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #89 unido a la cadena.
+2025-12-14 16:25:25,814 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #89 aceptado y propagado.
+2025-12-14 16:25:25,814 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:26,332 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 90 verificada.
+2025-12-14 16:25:26,332 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000707e33b46ec1a69c0616f461c890170ab7040b54dc1a8f0bd53f79244170 verificado.
+2025-12-14 16:25:26,332 [INFO] [akm.core.models.blockchain]: ✅ Bloque #90 guardado en DB permanentemente.
+2025-12-14 16:25:26,332 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #90 unido a la cadena.
+2025-12-14 16:25:26,332 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #90 aceptado y propagado.
+2025-12-14 16:25:26,332 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:30,281 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 91 verificada.
+2025-12-14 16:25:30,282 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00000c272cc0cd7bd303da7f6deb7db9069b8bbd52a5897a40668ca74277ab64 verificado.
+2025-12-14 16:25:30,290 [INFO] [akm.core.models.blockchain]: ✅ Bloque #91 guardado en DB permanentemente.
+2025-12-14 16:25:30,290 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #91 unido a la cadena.
+2025-12-14 16:25:30,290 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #91 aceptado y propagado.
+2025-12-14 16:25:30,290 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:31,255 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 92 verificada.
+2025-12-14 16:25:31,255 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000062d1e6d11001ccaf3cac428d3286e1c1ee2591bdaccc60c87816a274f0d3 verificado.
+2025-12-14 16:25:31,264 [INFO] [akm.core.models.blockchain]: ✅ Bloque #92 guardado en DB permanentemente.
+2025-12-14 16:25:31,264 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #92 unido a la cadena.
+2025-12-14 16:25:31,264 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #92 aceptado y propagado.
+2025-12-14 16:25:31,264 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:33,126 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 93 verificada.
+2025-12-14 16:25:33,126 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000077d226ce4cff828c46343c060c7d9376aa9b154014677020a4e25dfd689f verificado.
+2025-12-14 16:25:33,141 [INFO] [akm.core.models.blockchain]: ✅ Bloque #93 guardado en DB permanentemente.
+2025-12-14 16:25:33,141 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #93 unido a la cadena.
+2025-12-14 16:25:33,141 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #93 aceptado y propagado.
+2025-12-14 16:25:33,141 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:33,781 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 94 verificada.
+2025-12-14 16:25:33,781 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00002c1e151466c875ab46cdf08097fefc41f5bae197eceebb28feefade17fbd verificado.
+2025-12-14 16:25:33,791 [INFO] [akm.core.models.blockchain]: ✅ Bloque #94 guardado en DB permanentemente.
+2025-12-14 16:25:33,791 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #94 unido a la cadena.
+2025-12-14 16:25:33,791 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #94 aceptado y propagado.
+2025-12-14 16:25:33,791 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:35,186 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 95 verificada.
+2025-12-14 16:25:35,186 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00001ef81420d3211b7f4acc915a7aba416d7a715153a4e822e4fe14ab5755f4 verificado.
+2025-12-14 16:25:35,193 [INFO] [akm.core.models.blockchain]: ✅ Bloque #95 guardado en DB permanentemente.
+2025-12-14 16:25:35,193 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #95 unido a la cadena.
+2025-12-14 16:25:35,193 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #95 aceptado y propagado.
+2025-12-14 16:25:35,193 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:40,101 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 96 verificada.
+2025-12-14 16:25:40,101 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000021e2b47f630bad2add2befba3ea6e2c6351c07321084e5b7407c93b0ed72 verificado.
+2025-12-14 16:25:40,111 [INFO] [akm.core.models.blockchain]: ✅ Bloque #96 guardado en DB permanentemente.
+2025-12-14 16:25:40,111 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #96 unido a la cadena.
+2025-12-14 16:25:40,112 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #96 aceptado y propagado.
+2025-12-14 16:25:40,112 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:41,023 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 97 verificada.
+2025-12-14 16:25:41,024 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00004554d2cda3bd5a83b9da34286b92a596b7605ce650d397624c5bd029265c verificado.
+2025-12-14 16:25:41,031 [INFO] [akm.core.models.blockchain]: ✅ Bloque #97 guardado en DB permanentemente.
+2025-12-14 16:25:41,031 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #97 unido a la cadena.
+2025-12-14 16:25:41,031 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #97 aceptado y propagado.
+2025-12-14 16:25:41,031 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:41,913 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 98 verificada.
+2025-12-14 16:25:41,913 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00000b75cf8c7bf6a0704ee8e54e1e257e9a2602cecfdfee9dc5157bf9fd6d8d verificado.
+2025-12-14 16:25:41,921 [INFO] [akm.core.models.blockchain]: ✅ Bloque #98 guardado en DB permanentemente.
+2025-12-14 16:25:41,921 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #98 unido a la cadena.
+2025-12-14 16:25:41,921 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #98 aceptado y propagado.
+2025-12-14 16:25:41,921 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:25:42,856 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 99 verificada.
+2025-12-14 16:25:42,856 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00002f212ae2147be0675a60b85a325368f7bf9ea9b3893ae87f3ca8fe423e0d verificado.
+2025-12-14 16:25:42,866 [INFO] [akm.core.models.blockchain]: ✅ Bloque #99 guardado en DB permanentemente.
+2025-12-14 16:25:42,866 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #99 unido a la cadena.
+2025-12-14 16:25:42,867 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #99 aceptado y propagado.
+2025-12-14 16:25:42,867 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:14,076 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 100 verificada.
+2025-12-14 16:26:14,076 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00001341ea9bfcbdf53ba0ada045b1d5ffdb6fad6ed0ab78789e0f5546a094e5 verificado.
+2025-12-14 16:26:14,086 [INFO] [akm.core.models.blockchain]: ✅ Bloque #100 guardado en DB permanentemente.
+2025-12-14 16:26:14,086 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #100 unido a la cadena.
+2025-12-14 16:26:14,086 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #100 aceptado y propagado.
+2025-12-14 16:26:14,086 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:14,581 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 101 verificada.
+2025-12-14 16:26:14,581 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000038a626d033ca323401c15ad0f7841f97fdb3f36167a03a97d8c53d874dd verificado.
+2025-12-14 16:26:14,595 [INFO] [akm.core.models.blockchain]: ✅ Bloque #101 guardado en DB permanentemente.
+2025-12-14 16:26:14,595 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #101 unido a la cadena.
+2025-12-14 16:26:14,595 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #101 aceptado y propagado.
+2025-12-14 16:26:14,595 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:14,601 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 102 verificada.
+2025-12-14 16:26:14,601 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000014683117a794148d319c002541cc3014a75240e33ba1f6a99d90c1353337 verificado.
+2025-12-14 16:26:14,611 [INFO] [akm.core.models.blockchain]: ✅ Bloque #102 guardado en DB permanentemente.
+2025-12-14 16:26:14,613 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #102 unido a la cadena.
+2025-12-14 16:26:14,613 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #102 aceptado y propagado.
+2025-12-14 16:26:14,613 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:14,613 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 103 verificada.
+2025-12-14 16:26:14,613 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000029e7c2916ca3ae3802754bc7d31e2a6b36a2175ec7675818f335c9db75d verificado.
+2025-12-14 16:26:14,622 [INFO] [akm.core.models.blockchain]: ✅ Bloque #103 guardado en DB permanentemente.
+2025-12-14 16:26:14,622 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #103 unido a la cadena.
+2025-12-14 16:26:14,625 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #103 aceptado y propagado.
+2025-12-14 16:26:14,625 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:14,625 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 104 verificada.
+2025-12-14 16:26:14,625 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00001cd6b8952fd0193e733204cdf4d29768d08a19d5da5f2792a6d7e9b05d6d verificado.
+2025-12-14 16:26:14,636 [INFO] [akm.core.models.blockchain]: ✅ Bloque #104 guardado en DB permanentemente.
+2025-12-14 16:26:14,636 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #104 unido a la cadena.
+2025-12-14 16:26:14,636 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #104 aceptado y propagado.
+2025-12-14 16:26:14,636 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:21,931 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 105 verificada.
+2025-12-14 16:26:21,931 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000018c631d918a61a52a0ae5748c4ac8322a3e4485f535309b9916973421ae7 verificado.
+2025-12-14 16:26:21,947 [INFO] [akm.core.models.blockchain]: ✅ Bloque #105 guardado en DB permanentemente.
+2025-12-14 16:26:21,947 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #105 unido a la cadena.
+2025-12-14 16:26:21,947 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #105 aceptado y propagado.
+2025-12-14 16:26:21,947 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:22,041 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 106 verificada.
+2025-12-14 16:26:22,041 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00001226b6b01a7a53e972d34f2ec56dc9557236d2a3edf5c00106e7d4d2cf0a verificado.
+2025-12-14 16:26:22,051 [INFO] [akm.core.models.blockchain]: ✅ Bloque #106 guardado en DB permanentemente.
+2025-12-14 16:26:22,051 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #106 unido a la cadena.
+2025-12-14 16:26:22,051 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #106 aceptado y propagado.
+2025-12-14 16:26:22,051 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:23,201 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 107 verificada.
+2025-12-14 16:26:23,201 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000018189e3afda65c4dbd2650f8d5808b425104600b568e60d12c4a55e4426f verificado.
+2025-12-14 16:26:23,241 [INFO] [akm.core.models.blockchain]: ✅ Bloque #107 guardado en DB permanentemente.
+2025-12-14 16:26:23,241 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #107 unido a la cadena.
+2025-12-14 16:26:23,241 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #107 aceptado y propagado.
+2025-12-14 16:26:23,241 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:32,459 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 108 verificada.
+2025-12-14 16:26:32,459 [INFO] [akm.core.validators.block_rules_validator]: Bloque 000017e6defbb83a4235f168705fb2678a055ae840fd03032f745fdabe2a40ce verificado.
+2025-12-14 16:26:32,490 [INFO] [akm.core.models.blockchain]: ✅ Bloque #108 guardado en DB permanentemente.
+2025-12-14 16:26:32,491 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #108 unido a la cadena.
+2025-12-14 16:26:32,491 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #108 aceptado y propagado.
+2025-12-14 16:26:32,491 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:32,511 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 109 verificada.
+2025-12-14 16:26:32,511 [INFO] [akm.core.validators.block_rules_validator]: Bloque 00000a9e2c5481f7caf58f1c15283a34f0c7fa6da1e9ef16b623a81a53feecf6 verificado.
+2025-12-14 16:26:32,524 [INFO] [akm.core.models.blockchain]: ✅ Bloque #109 guardado en DB permanentemente.
+2025-12-14 16:26:32,524 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #109 unido a la cadena.
+2025-12-14 16:26:32,524 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #109 aceptado y propagado.
+2025-12-14 16:26:32,524 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.
+2025-12-14 16:26:48,904 [INFO] [akm.core.validators.coinbase_validator]: Coinbase bloque 110 verificada.
+2025-12-14 16:26:48,904 [INFO] [akm.core.validators.block_rules_validator]: Bloque 0000014694e73724d26f993d2c12cf99846fc8cc830fbd21057395f9571a45da verificado.
+2025-12-14 16:26:48,941 [INFO] [akm.core.models.blockchain]: ✅ Bloque #110 guardado en DB permanentemente.
+2025-12-14 16:26:48,941 [INFO] [akm.core.managers.consensus_orchestrator]: 🔗 Bloque #110 unido a la cadena.
+2025-12-14 16:26:48,941 [INFO] [akm.core.nodes.full_node]: 📢 Nuevo Bloque #110 aceptado y propagado.
+2025-12-14 16:26:48,941 [INFO] [akm.core.managers.gossip_manager]: 📡 Gossip: Propagando bloque #???.

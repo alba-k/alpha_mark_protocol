@@ -1,0 +1,24 @@
+{
+    "role": "FULL_NODE",
+    "instance_name": "nodo_maestro",
+    "network": {
+        "p2p_host": "0.0.0.0",
+        "p2p_port_default": 6000,
+        "max_peers": 80,
+        "seeds": []
+    },
+    "consensus": {
+        "mining_enabled": false,
+        "miner_address": "",
+        "threads": 0
+    },
+    "persistence": {
+        "engine": "sqlite",
+        "db_name": "blockchain_full.db",
+        "prune_history": false
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port_default": 8100
+    }
+}

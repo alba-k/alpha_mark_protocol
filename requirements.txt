@@ -1,0 +1,24 @@
+# akm/requirements.txt
+
+# --- Criptografía Core ---
+ecdsa==0.19.0
+six==1.16.0
+cryptography>=41.0.0
+pycryptodome>=3.20.0   # <--- AGREGADO: Vital para 'from Crypto.PublicKey import ECC'
+
+# --- Identidad y Direcciones ---
+mnemonic==0.20
+base58==2.1.1
+
+# --- Configuración ---
+python-dotenv==1.0.0
+
+# --- API y Servidor ---
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+pydantic>=2.0.0
+requests>=2.31.0       # <--- AGREGADO: Necesario para que los clientes hablen con la API
+
+# --- Testing ---
+pytest==8.0.0
+httpx>=0.24.0

@@ -1,0 +1,25 @@
+{
+    "role": "SPV",
+    "network": {
+        "p2p_host": "0.0.0.0",
+        "p2p_port_default": 6000,
+        "max_peers": 10,
+        "seeds": [
+            "192.168.1.XX:5000"
+        ]
+    },
+    "consensus": {
+        "mining_enabled": false,
+        "miner_address": "",
+        "threads": 0
+    },
+    "persistence": {
+        "engine": "none",
+        "db_name": "",
+        "prune_history": true
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port_default": 8080
+    }
+}
