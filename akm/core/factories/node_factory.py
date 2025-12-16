@@ -1,6 +1,6 @@
-# akm/core/factories/node_factory.py
-
 import logging
+import json
+import os
 from typing import Dict, Any, cast, Union
 
 # Configuración
@@ -44,7 +44,6 @@ class NodeFactory:
     def create_node(role: str) -> Union[FullNode, MinerNode, SPVNode]:
         """
         Factory Method Principal: Despacha la creación según el rol.
-        Usado por main.py (Headless) y server.py (SPV API).
         """
         logger.info(f"🏭 NodeFactory: Solicitud de creación para rol '{role}'")
         
@@ -63,14 +62,34 @@ class NodeFactory:
         try:
             logger.info("Fabricando SPV Node (Cliente Ligero)...")
             
+            # 1. Configuración de Red
             network_config = NetworkConfig()
+            
+            # [FIX] Intentar cargar configuración específica si existe
+            # Esto soluciona que el puerto sea 0 si no se pasa config
+            try:
+                config_path = "config/spv.json" # Ruta estándar
+                if os.path.exists(config_path):
+                    with open(config_path, 'r') as f:
+                        data = json.load(f)
+                        if "network" in data:
+                            network_config.update_from_dict(data["network"])
+                            logger.info(f"⚙️ Configuración SPV inyectada desde {config_path}")
+            except Exception as e:
+                logger.warning(f"No se pudo cargar config SPV automática: {e}")
+
+            # 2. Servicios
             p2p_service = P2PService(network_config) 
+            
+            # 3. Gossip (Vinculado al P2P)
             gossip_manager = GossipManager(p2p_service)
             
+            # 4. Instanciación del Nodo
+            # Ahora SPVNode acepta (p2p_service, gossip_manager)
             node = SPVNode(p2p_service, gossip_manager)
+            
             logger.info("SPV Node ensamblado.")
             return node
-            
         except Exception:
             logger.exception("Fallo al ensamblar SPV Node")
             raise
@@ -92,7 +111,6 @@ class NodeFactory:
             )
             logger.info("Full Node ensamblado.")
             return node
-            
         except Exception:
             logger.exception("Fallo al ensamblar Full Node")
             raise
@@ -103,7 +121,6 @@ class NodeFactory:
             logger.info("Fabricando Miner Node (Trabajador PoW)...")
             deps = NodeFactory._build_server_dependencies()
             
-            # Instanciar configuración de minería
             mining_config = MiningConfig()
 
             mining_manager = MiningManager(
@@ -126,7 +143,6 @@ class NodeFactory:
             )
             logger.info("Miner Node ensamblado.")
             return node
-
         except Exception:
             logger.exception("Fallo al ensamblar Miner Node")
             raise
@@ -134,7 +150,7 @@ class NodeFactory:
     @staticmethod
     def _build_server_dependencies() -> Dict[str, Any]:
         """
-        Construye el grafo de dependencias común para nodos de servidor (Full y Miner).
+        Construye el grafo de dependencias común para nodos de servidor.
         """
         try:
             # 1. Configuración
@@ -146,8 +162,8 @@ class NodeFactory:
             utxo_repo = RepositoryFactory.get_utxo_repository()
             
             # 3. Estado Base
-            blockchain = Blockchain(blockchain_repo)
             utxo_set = UTXOSet(utxo_repo)
+            blockchain = Blockchain(blockchain_repo, utxo_set)
             mempool = Mempool()
             
             # 4. Servicios de Red

@@ -1,0 +1,25 @@
+{
+    "role": "MINER",
+    "network": {
+        "p2p_host": "0.0.0.0",
+        "p2p_port_default": 6001,
+        "max_peers": 50,
+        "seeds": [
+            "192.168.0.128:6000"
+        ]
+    },
+    "consensus": {
+        "mining_enabled": true,
+        "miner_address": "1GQkiSucNWSVA8creoW8RaRF4jzC2vTQUp",
+        "threads": 1
+    },
+    "persistence": {
+        "engine": "sqlite",
+        "db_name": "blockchain_miner_pc2.db",
+        "prune_history": false
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port_default": 8200
+    }
+}

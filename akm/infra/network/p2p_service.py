@@ -3,7 +3,8 @@
 import json
 import logging
 import time
-from typing import Dict, Any, Callable, Optional, List
+import socket
+from typing import Dict, Any, Callable, Optional, List, cast, Set
 
 # Interfaces
 from akm.core.interfaces.i_network import INetworkService
@@ -13,154 +14,180 @@ from akm.core.config.protocol_constants import ProtocolConstants
 from akm.core.config.network_config import NetworkConfig 
 from akm.infra.network.connection_manager import ConnectionManager
 
-# Configurar logger local
 logger = logging.getLogger(__name__)
 
-class P2PService(INetworkService):
-    """
-    Implementación concreta del servicio de red P2P.
-    Maneja el descubrimiento de pares, handshake y transmisión de mensajes.
-    """
+class NetworkEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if hasattr(o, 'to_dict'):
+            return o.to_dict()
+        if isinstance(o, bytes):
+            return o.hex()
+        if isinstance(o, set):
+            return list(cast(Set[Any], o))
+        return super().default(o)
 
-    def __init__(self, config: NetworkConfig) -> None:
+class P2PService(INetworkService):
+    
+    def __init__(self, config: NetworkConfig, agent_name: str = "AlphaMark/Unknown:0.0.1") -> None:
         try:
-            self.config = config
-            self.message_handler: Optional[Callable[[Dict[str, Any], str], None]] = None
+            self._config = config
+            self._agent_name = agent_name
+            self._message_handler: Optional[Callable[[Dict[str, Any], str], None]] = None
             self._height_provider: Optional[Callable[[], int]] = None
             
-            # Inicialización del transporte de bajo nivel (Sockets/TCP)
-            self.connection = ConnectionManager(
-                host=self.config.host,
-                port=self.config.port,
-                max_connections=self.config.max_connections, 
-                max_buffer_size=self.config.max_buffer_size, 
-                on_message_received=self._on_bytes_received 
+            self._connection = ConnectionManager(
+                host=self._config.host,
+                port=self._config.port,
+                max_connections=self._config.max_connections, 
+                max_buffer_size=self._config.max_buffer_size, 
+                on_message_received=self._on_message_received 
             )
-            logger.info(f"✅ Servicio P2P inicializado en {self.config.host}:{self.config.port}")
+            
+            self._advertised_host = self._resolve_advertised_host()
+            
+            logger.info(f"✅ P2PService listo. ID: {self._advertised_host}:{self._config.port} | Agente: {self._agent_name}")
+            
         except Exception as e:
-            logger.exception(f"❌ Error crítico al inicializar P2PService: {e}")
-            raise e
+            logger.critical(f"❌ Error fatal iniciando P2PService: {e}")
+            raise
+
+    # ---------------------------------------------------------
+    # 👇 SOLUCIÓN: Agrega esta propiedad para exponer _config
+    # ---------------------------------------------------------
+    @property
+    def config(self) -> NetworkConfig:
+        return self._config
+    # ---------------------------------------------------------
 
     def set_height_provider(self, provider: Callable[[], int]) -> None:
-        """Define la función callback para obtener la altura actual de la cadena."""
         self._height_provider = provider
 
+    def register_handler(self, handler: Callable[[Dict[str, Any], str], None]) -> None:
+        self._message_handler = handler
+
     def start(self) -> None:
-        """Inicia el servidor y conecta a los seeds."""
         try:
-            self.connection.start_server()
-            
-            if self.config.seeds:
-                logger.info(f"🌍 P2P: Iniciando descubrimiento con {len(self.config.seeds)} seeds.")
-                for seed in self.config.seeds:
-                    try:
-                        # Formato esperado "IP:PORT"
-                        parts = seed.split(":")
-                        if len(parts) == 2:
-                            ip, port_str = parts
-                            # Evitar auto-conexión
-                            if int(port_str) != self.config.port:
-                                self.connect_to(ip, int(port_str))
-                    except ValueError:
-                        logger.warning(f"⚠️ Seed con formato inválido ignorado: {seed}")
+            self._connection.start_server()
+            if self._config.seeds:
+                logger.info(f"🌍 Iniciando descubrimiento de red ({len(self._config.seeds)} seeds config).")
+                self._connect_to_seeds()
         except Exception:
-            logger.exception("Error durante el arranque del servicio P2P")
+            logger.exception("Error arrancando servicio P2P")
+
+    def stop(self) -> None:
+        self._connection.stop()
+        logger.info("🛑 P2PService detenido.")
 
     def connect_to(self, ip: str, port: int) -> bool:
-        """Intenta establecer una conexión saliente."""
         try:
-            if self.connection.connect_outbound(ip, port):
+            if ip in ["127.0.0.1", "localhost", "0.0.0.0"] and port == self._config.port:
+                return False
+
+            if self._connection.connect_outbound(ip, port):
                 peer_id = f"{ip}:{port}"
-                # Iniciar protocolo de Handshake inmediatamente después de conectar
                 self._send_handshake(peer_id)
                 return True
             return False
         except Exception as e:
-            logger.error(f"Error al conectar con {ip}:{port} -> {e}")
+            logger.warning(f"Fallo conectando a {ip}:{port} - {e}")
             return False
 
     def broadcast(self, message: Dict[str, Any], exclude_peer: Optional[str] = None) -> None:
-        """Envía un mensaje a todos los pares conectados, excepto al excluido."""
         try:
-            # Añadir timestamp de red para depuración/métricas
             if "_net_t" not in message:
                 message["_net_t"] = int(time.time())
-            
-            json_bytes = json.dumps(message).encode('utf-8')
-            self.connection.broadcast(json_bytes, exclude_peer)
+            payload_bytes = self._serialize(message)
+            self._connection.broadcast(payload_bytes, exclude_peer)
         except Exception:
-            logger.exception("Fallo técnico en broadcast P2P")
+            logger.error("Error en broadcast P2P", exc_info=True)
 
     def send_message(self, peer_id: str, message: Dict[str, Any]) -> bool:
-        """Envía un mensaje directo a un par específico."""
         try:
-            json_bytes = json.dumps(message).encode('utf-8')
-            return self.connection.send_direct(peer_id, json_bytes)
+            payload_bytes = self._serialize(message)
+            return self._connection.send_direct(peer_id, payload_bytes)
         except Exception:
-            logger.exception(f"Error serializando mensaje para {peer_id}")
+            logger.error(f"Error enviando mensaje directo a {peer_id}", exc_info=True)
             return False
 
-    def register_handler(self, handler: Callable[[Dict[str, Any], str], None]) -> None:
-        """Registra el callback principal para procesar mensajes entrantes."""
-        self.message_handler = handler
-
     def get_connected_peers(self) -> List[str]:
-        return self.connection.get_active_peers()
+        return self._connection.get_active_peers()
 
-    def stop(self) -> None:
-        try:
-            self.connection.stop()
-            logger.info("🛑 P2P: Servicio detenido.")
-        except Exception:
-            logger.exception("Error al detener P2PService")
-
-    # --- PROTOCOLO DE RED (Privado) ---
+    def _connect_to_seeds(self):
+        for seed in self._config.seeds:
+            try:
+                if ":" not in seed: continue
+                ip, port_str = seed.split(":")
+                port = int(port_str)
+                if port != self._config.port:
+                    self.connect_to(ip, port)
+            except ValueError:
+                pass
 
     def _send_handshake(self, peer_id: str) -> None:
-        """Envía el mensaje inicial de versión/handshake."""
+        """Protocolo: HANDSHAKE con IDENTIDAD INYECTADA."""
         try:
-            height = self._height_provider() if self._height_provider else 0
+            current_height = self._height_provider() if self._height_provider else 0
+            
             msg: Dict[str, Any] = {
                 "type": ProtocolConstants.MSG_HANDSHAKE,
                 "payload": {
                     "version": ProtocolConstants.PROTOCOL_VERSION,
-                    "height": height,
-                    "node_id": f"{self.config.host}:{self.config.port}",
+                    "height": current_height,
+                    "node_id": f"{self._advertised_host}:{self._config.port}",
+                    "agent": self._agent_name, 
                     "timestamp": int(time.time())
                 }
             }
-            # Usar send_direct internamente evita recursión innecesaria
-            json_bytes = json.dumps(msg).encode('utf-8')
-            if self.connection.send_direct(peer_id, json_bytes):
-                logger.debug(f"🤝 Handshake enviado a {peer_id}.")
-        except Exception:
-            logger.exception(f"Fallo enviando Handshake a {peer_id}")
-
-    def _on_bytes_received(self, peer_id: str, message_str: str) -> None:
-        """Callback invocado por ConnectionManager cuando llegan bytes."""
-        try:
-            if not message_str or not message_str.strip():
-                return
             
+            payload_bytes = self._serialize(msg)
+            if self._connection.send_direct(peer_id, payload_bytes):
+                logger.debug(f"🤝 Handshake enviado a {peer_id} (Soy: {self._agent_name})")
+                
+        except Exception:
+            logger.error(f"Fallo crítico enviando Handshake a {peer_id}")
+
+    def _on_message_received(self, peer_id: str, message_str: str) -> None:
+        try:
+            if not message_str: return
             data = json.loads(message_str)
             msg_type = data.get("type")
-            
-            if not msg_type:
-                return
+            if not msg_type: return
 
-            # Manejo interno del Handshake (logging)
             if msg_type == ProtocolConstants.MSG_HANDSHAKE:
-                p = data.get('payload', {})
-                logger.info(f"🤝 Handshake recibido de {peer_id} | Altura: {p.get('height')} | Ver: {p.get('version')}")
-                # Nota: Aquí se podría añadir lógica para rechazar versiones incompatibles
+                self._handle_handshake_log(data, peer_id)
 
-            # Delegar al manejador superior (GossipManager/SyncManager/Node)
-            if self.message_handler:
-                self.message_handler(data, peer_id)
+            if self._message_handler:
+                self._message_handler(data, peer_id)
                 
         except json.JSONDecodeError:
-            logger.warning(f"🗑️ P2P: JSON inválido recibido de {peer_id}.")
-        except Exception:
-            logger.exception(f"🔥 Error procesando mensaje de {peer_id}")
+            logger.warning(f"🗑️ JSON corrupto recibido de {peer_id}")
+        except Exception as e:
+            logger.error(f"Error procesando mensaje de {peer_id}: {e}")
 
-    
+    def _handle_handshake_log(self, data: Dict[str, Any], peer_id: str):
+        payload = data.get('payload', {})
+        remote_height = payload.get('height', '?')
+        remote_agent = payload.get('agent', payload.get('node_id', 'Unknown'))
+        
+        logger.info(f"🤝 CONEXIÓN ESTABLECIDA con [{remote_agent}] ({peer_id}) | Altura: {remote_height}")
+
+    def _serialize(self, data: Dict[str, Any]) -> bytes:
+        return json.dumps(data, cls=NetworkEncoder).encode('utf-8')
+
+    def _resolve_advertised_host(self) -> str:
+        host = self._config.host
+        if host == "0.0.0.0":
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.settimeout(0)
+                try:
+                    s.connect(('8.8.8.8', 1))
+                    ip = s.getsockname()[0]
+                except Exception:
+                    ip = "127.0.0.1"
+                finally:
+                    s.close()
+                return ip
+            except Exception:
+                return "127.0.0.1"
+        return host

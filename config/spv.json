@@ -1,0 +1,24 @@
+{
+    "role": "SPV_NODE",
+    "instance_name": "billetera_movil",
+    "network": {
+        "p2p_host": "0.0.0.0",
+        "p2p_port_default": 0,
+        "max_peers": 10,
+        "seeds": [
+            "127.0.0.1:6000"
+        ]
+    },
+    "consensus": {
+        "mining_enabled": false
+    },
+    "persistence": {
+        "engine": "sqlite",
+        "db_name": "wallet.db",
+        "prune_history": true
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port_default": 8080
+    }
+}

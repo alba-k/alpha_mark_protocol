@@ -30,21 +30,46 @@ class SqliteUTXORepository(IUTXORepository):
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_utxo_address ON utxos (address)')
         self.conn.commit()
 
-    # --- Métodos básicos (add_utxo, remove_utxo) ---
+    # --- [IMPORTANTE] EL TRADUCTOR QUE FALTABA ---
+    def _address_to_script_pattern(self, address: Union[str, bytes]) -> bytes:
+        """
+        Convierte la dirección simple (ej. '1GQ...') al formato de SCRIPT (P2PKH)
+        que está realmente almacenado en la base de datos.
+        """
+        OP_DUP = b'\x76'
+        OP_HASH160 = b'\xa9'
+        OP_EQUALVERIFY = b'\x88'
+        OP_CHECKSIG = b'\xac'
+
+        if isinstance(address, str):
+            addr_bytes = address.encode('utf-8')
+        else:
+            addr_bytes = address
+            
+        push_op = bytes([len(addr_bytes)])
+        
+        # Construimos el candado para que coincida con la DB
+        return (
+            OP_DUP + 
+            OP_HASH160 + 
+            push_op + addr_bytes + 
+            OP_EQUALVERIFY + 
+            OP_CHECKSIG
+        )
+
+    # --- Métodos básicos ---
     def add_utxo(self, tx_hash: str, index: int, output: TxOutput) -> None:
         try:
             cursor = self.conn.cursor()
-            addr_val = output.script_pubkey
-            if isinstance(addr_val, str):
-                addr_val = addr_val.encode('utf-8')
+            script_blob = output.script_pubkey
+            if isinstance(script_blob, str):
+                script_blob = script_blob.encode('utf-8')
 
             cursor.execute('''
                 INSERT OR REPLACE INTO utxos (tx_hash, output_index, amount, address)
                 VALUES (?, ?, ?, ?)
-            ''', (tx_hash, index, output.value_alba, addr_val))
+            ''', (tx_hash, index, output.value_alba, script_blob))
             self.conn.commit()
-            
-            logger.debug(f"➕ UTXO Añadido: {tx_hash[:8]}... index {index} ({output.value_alba} Alba)")
             
         except Exception as e:
             logger.error(f"❌ Error guardando UTXO en {tx_hash[:8]}: {e}")
@@ -56,41 +81,25 @@ class SqliteUTXORepository(IUTXORepository):
             cursor.execute('DELETE FROM utxos WHERE tx_hash = ? AND output_index = ?', (tx_hash, index))
             self.conn.commit()
             
-            logger.debug(f"➖ UTXO Gastado/Eliminado: {tx_hash[:8]}... index {index}")
-            
         except Exception as e:
             logger.error(f"❌ Error eliminando UTXO {tx_hash[:8]}: {e}")
             self.conn.rollback()
 
     def update_batch(self, new_utxos: List[Tuple[str, int, TxOutput]], spent_utxos: List[Tuple[str, int]]) -> None:
-        """Aplica adición y eliminación de UTXOs en una transacción atómica."""
         cursor = self.conn.cursor()
         
         try:
-            # 1. Eliminar UTXOs gastados (Inputs)
-            # spent_utxos ya está en el formato requerido List[Tuple[str, int]]
-            spent_data_for_db = spent_utxos
-            
-            if spent_data_for_db:
-                # Usamos executemany para eficiencia en la eliminación
-                cursor.executemany('DELETE FROM utxos WHERE tx_hash = ? AND output_index = ?', spent_data_for_db)
+            if spent_utxos:
+                cursor.executemany('DELETE FROM utxos WHERE tx_hash = ? AND output_index = ?', spent_utxos)
 
-            # 2. Insertar nuevas UTXOs (Outputs)
-            # Definimos new_data con una sugerencia de tipo explícita para evitar 'Unknown'
-            # Los elementos serán (tx_hash, index, amount, address_bytes)
             new_data: List[Tuple[str, int, int, bytes]] = [] 
-            
             for tx_hash, index, output in new_utxos:
-                addr_val = output.script_pubkey
-                
-                # Aseguramos que la dirección sea bytes para la base de datos (BLOB)
-                if isinstance(addr_val, str):
-                    addr_val = addr_val.encode('utf-8')
-                
-                new_data.append((tx_hash, index, output.value_alba, addr_val))
+                script_blob = output.script_pubkey
+                if isinstance(script_blob, str):
+                    script_blob = script_blob.encode('utf-8')
+                new_data.append((tx_hash, index, output.value_alba, script_blob))
             
             if new_data:
-                # Usamos executemany para inserción eficiente (INSERT OR REPLACE)
                 cursor.executemany('''
                     INSERT OR REPLACE INTO utxos (tx_hash, output_index, amount, address)
                     VALUES (?, ?, ?, ?)
@@ -102,35 +111,33 @@ class SqliteUTXORepository(IUTXORepository):
         except Exception as e:
             logger.error(f"❌ Error CRÍTICO en UTXO batch update: {e}")
             self.conn.rollback()
-            raise e # Es un error crítico, debe propagarse
+            raise e
 
-    # --- Métodos de consulta (mantienen su lógica) ---
+    # --- CONSULTAS ---
 
     def get_utxo(self, tx_hash: str, index: int) -> Optional[TxOutput]:
         cursor = self.conn.cursor()
         cursor.execute('SELECT amount, address FROM utxos WHERE tx_hash = ? AND output_index = ?', (tx_hash, index))
         row = cursor.fetchone()
         if row:
-            addr = row[1]
-            if isinstance(addr, str):
-                addr = addr.encode('utf-8')
-            return TxOutput(value_alba=int(row[0]), script_pubkey=addr)
+            # Retorna el script almacenado
+            return TxOutput(value_alba=int(row[0]), script_pubkey=row[1])
         return None
  
     def get_utxos_by_address(self, address: Union[str, bytes]) -> List[Dict[str, Any]]:
         cursor = self.conn.cursor()
         
-        addr_query = address
-        if isinstance(address, str):
-            addr_query = address.encode('utf-8')
+        # [AQUÍ ESTÁ LA CORRECCIÓN CLAVE]
+        # Usamos el traductor para buscar el candado correcto
+        target_script = self._address_to_script_pattern(address)
 
-        cursor.execute('SELECT tx_hash, output_index, amount, address FROM utxos WHERE address = ?', (addr_query,))
+        cursor.execute('SELECT tx_hash, output_index, amount, address FROM utxos WHERE address = ?', (target_script,))
         rows = cursor.fetchall()
         
         results: List[Dict[str, Any]] = []
         for row in rows:
-            addr_stored = row[3]
-            out_obj = TxOutput(value_alba=int(row[2]), script_pubkey=addr_stored)
+            script_stored = row[3]
+            out_obj = TxOutput(value_alba=int(row[2]), script_pubkey=script_stored)
             
             results.append({
                 "tx_hash": row[0],
@@ -139,25 +146,21 @@ class SqliteUTXORepository(IUTXORepository):
                 "output_object": out_obj
             })
             
-        logger.debug(f"🔍 Consulta de balance: {len(results)} UTXOs encontrados para la dirección.")
+        logger.debug(f"🔍 Consulta de balance: {len(results)} UTXOs encontrados.")
         return results
 
     def get_total_supply(self) -> int:
         cursor = self.conn.cursor()
         cursor.execute('SELECT SUM(amount) FROM utxos')
         res = cursor.fetchone()
-        total = res[0] if res[0] else 0
-        logger.info(f"📊 Suministro total circulante: {total} Alba")
-        return total
+        return res[0] if res[0] else 0
 
     def clear(self) -> None:
-        """Limpia todo el estado UTXO. Usar con extrema precaución."""
         try:
             cursor = self.conn.cursor()
             cursor.execute('DELETE FROM utxos')
             self.conn.commit()
-            logger.warning("⚠️ CRÍTICO: UTXO Set vaciado completamente de la base de datos.")
+            logger.warning("⚠️ UTXO Set vaciado.")
         except Exception as e:
-            logger.error(f"❌ Fallo al limpiar UTXO Set: {e}")
             self.conn.rollback()
             raise e

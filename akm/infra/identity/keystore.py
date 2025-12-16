@@ -1,9 +1,9 @@
-# akm/infra/identity/keystore.py
 import os
 import json
 import base64
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -11,16 +11,35 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 # Servicios de identidad
 from akm.core.services.identity_service import IdentityService
 
-# ✅ Logger sintético para bitácora de seguridad física
 logger = logging.getLogger(__name__)
 
 class Keystore:
     
-    def __init__(self, filepath: str = "wallet.dat"):
+    def __init__(self, filename: str = "wallet.dat", filepath: Optional[str] = None):
+        """
+        Inicializa el Keystore.
+        Puede recibir un 'filepath' explícito (usado por la API) 
+        o construirlo basado en 'filename' y 'AKM_DATA_DIR'.
+        """
         try:
-            self.filepath = filepath
             self._identity_service = IdentityService()
-            logger.info(f"Keystore inicializado en: {self.filepath}")
+
+            # LÓGICA CORREGIDA:
+            if filepath:
+                # Caso 1: La API nos pasa la ruta completa
+                self.filepath = filepath
+                self.data_dir = os.path.dirname(filepath)
+            else:
+                # Caso 2: Comportamiento por defecto (Directorios de entorno)
+                self.data_dir = os.environ.get("AKM_DATA_DIR", ".")
+                self.filepath = os.path.join(self.data_dir, filename)
+            
+            # Asegurar que el directorio existe (en ambos casos)
+            if self.data_dir and not os.path.exists(self.data_dir):
+                os.makedirs(self.data_dir, exist_ok=True)
+
+            logger.info(f"🔐 Keystore activo en: {self.filepath}")
+
         except Exception:
             logger.exception("Error al inicializar Keystore")
 
@@ -30,9 +49,8 @@ class Keystore:
                 algorithm=hashes.SHA256(),
                 length=32,
                 salt=salt,
-                iterations=480000, # Estándar de resistencia actual
+                iterations=480000, 
             )
-            # Retorna b64 url-safe para Fernet
             return base64.urlsafe_b64encode(kdf.derive(password.encode()))
         except Exception:
             logger.exception("Fallo técnico en la derivación de llave")
@@ -40,21 +58,17 @@ class Keystore:
 
     def create_new_wallet(self, password: str) -> Dict[str, str]:
         try:
-            logger.info("Iniciando creación de almacén seguro...")
+            logger.info("Creando nueva identidad...")
 
-            # 1. Generar identidad nueva
             identity = self._identity_service.create_new_identity()
             
-            # 2. Preparar cifrado (Fernet/AES)
             salt = os.urandom(16) 
             key = self._derive_key_from_password(password, salt)
             cipher_suite = Fernet(key)
             
-            # 3. Encriptar Clave Privada
             secret_bytes = identity['private_key'].encode('utf-8')
             encrypted_secret = cipher_suite.encrypt(secret_bytes)
             
-            # 4. Estructura de persistencia JSON
             wallet_data: Dict[str, Any] = {
                 "version": 1,
                 "address": identity['address'],
@@ -63,41 +77,35 @@ class Keystore:
                 "ciphertext": base64.b64encode(encrypted_secret).decode('utf-8')
             }
             
-            # 5. Escritura en disco
+            # Guardamos en la ruta definida
             with open(self.filepath, "w") as f:
                 json.dump(wallet_data, f, indent=4)
                 
-            logger.info(f"Billetera creada y encriptada exitosamente en {self.filepath}")
+            logger.info(f"✅ Billetera guardada: {self.filepath}")
             return identity
 
         except Exception:
-            logger.exception("Error fatal creando el archivo de billetera")
+            logger.exception("Error fatal creando wallet")
             raise
 
     def load_wallet(self, password: str) -> Dict[str, str]:
         if not os.path.exists(self.filepath):
-            logger.info(f"Carga fallida: No existe el archivo {self.filepath}")
-            raise FileNotFoundError("Archivo de billetera no encontrado.")
+            raise FileNotFoundError(f"No existe wallet en {self.filepath}")
             
         try:
-            logger.info("Intentando desbloquear almacén seguro...")
-            
             with open(self.filepath, "r") as f:
                 data = json.load(f)
             
-            # A. Recuperar parámetros
             salt = base64.b64decode(data['kdf_salt'])
             ciphertext = base64.b64decode(data['ciphertext'])
             
-            # B. Re-derivar llave
             key = self._derive_key_from_password(password, salt)
             cipher_suite = Fernet(key)
             
-            # C. Desencriptar
             decrypted_bytes = cipher_suite.decrypt(ciphertext)
             private_key = decrypted_bytes.decode('utf-8')
             
-            logger.info(f"Billetera desbloqueada para dirección: {data['address'][:8]}...")
+            logger.info(f"🔓 Wallet desbloqueada: {data['address'][:8]}...")
             
             return {
                 "address": data['address'],
@@ -107,10 +115,8 @@ class Keystore:
             
         except Exception as e:
             if "InvalidToken" in str(e) or isinstance(e, ValueError):
-                logger.info("Intento de acceso fallido: Contraseña incorrecta.")
                 raise ValueError("Contraseña incorrecta.")
-            
-            logger.exception("Error técnico al cargar la billetera")
+            logger.exception("Error cargando wallet")
             raise
 
     def wallet_exists(self) -> bool:

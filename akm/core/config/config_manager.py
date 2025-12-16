@@ -1,14 +1,5 @@
 # akm/core/config/config_manager.py
-'''
-class ConfigManager:
-    Orquesta y centraliza el acceso a la configuración de todos los módulos (Consenso, Red, Persistencia y Minería), cargando valores desde el entorno o JSON.
 
-    Methods:
-        __new__(cls): Implementa el patrón Singleton para asegurar una única instancia.
-        _initialize(self): Inicializa y carga las configuraciones especializadas (Consensus, Network, etc.) con valores por defecto/entorno.
-        load_from_json_dict(self, json_data: Dict[str, Any]) -> None: Orquesta la actualización de todas las sub-configuraciones a partir de un diccionario JSON completo.
-
-'''
 
 from dotenv import load_dotenv
 from typing import Dict, Any

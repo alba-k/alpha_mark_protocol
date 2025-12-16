@@ -21,6 +21,28 @@ logger = logging.getLogger(__name__)
 class TransactionFactory:
 
     @staticmethod
+    def _build_p2pkh_script(address: str) -> bytes:
+        """
+        [FIX] Genera un script P2PKH estándar para que WalletManager reconozca los fondos.
+        Formato: OP_DUP OP_HASH160 <len> <address> OP_EQUALVERIFY OP_CHECKSIG
+        """
+        OP_DUP = b'\x76'
+        OP_HASH160 = b'\xa9'
+        OP_EQUALVERIFY = b'\x88'
+        OP_CHECKSIG = b'\xac'
+        
+        addr_bytes = address.encode('utf-8')
+        push_op = bytes([len(addr_bytes)])
+        
+        return (
+            OP_DUP + 
+            OP_HASH160 + 
+            push_op + addr_bytes + 
+            OP_EQUALVERIFY + 
+            OP_CHECKSIG
+        )
+
+    @staticmethod
     def create_coinbase(miner_address: str, block_height: int, total_reward: int, extra_nonce: str = "") -> Transaction:
         try:
             # 1. Input: Altura + ExtraNonce (BIP34 para unicidad del Hash)
@@ -36,9 +58,12 @@ class TransactionFactory:
             )
 
             # 2. Output: Pago al minero
+            # [FIX CRÍTICO]: Usamos el script P2PKH en lugar de la dirección cruda
+            script_pubkey = TransactionFactory._build_p2pkh_script(miner_address)
+            
             tx_output = TxOutput(
                 value_alba=total_reward,
-                script_pubkey=miner_address.encode('utf-8')
+                script_pubkey=script_pubkey
             )
 
             # 3. Ensamblaje temporal
@@ -74,17 +99,21 @@ class TransactionFactory:
             outputs: List[TxOutput] = [] 
 
             # A. Output Principal (Pago)
+            # [FIX]: Aplicamos script P2PKH también aquí
+            payment_script = TransactionFactory._build_p2pkh_script(recipient_address)
             payment_output = TxOutput(
                 value_alba=amount,
-                script_pubkey=recipient_address.encode('utf-8')
+                script_pubkey=payment_script
             )
             outputs.append(payment_output)
 
             # B. Output de Cambio (Si aplica)
             if change_address and change_amount > 0:
+                # [FIX]: Aplicamos script P2PKH al cambio
+                change_script = TransactionFactory._build_p2pkh_script(change_address)
                 change_output = TxOutput(
                     value_alba=change_amount,
-                    script_pubkey=change_address.encode('utf-8')
+                    script_pubkey=change_script
                 )
                 outputs.append(change_output)
 

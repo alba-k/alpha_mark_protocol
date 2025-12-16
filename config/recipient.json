@@ -1,0 +1,26 @@
+{
+    "role": "SPV_NODE",
+    "instance_name": "billetera_destinatario",
+    "network": {
+        "p2p_host": "0.0.0.0",
+        "p2p_port_default": 0,
+        "max_peers": 10,
+        "seeds": [
+            "172.21.16.1:6000"
+        ]
+    },
+    "consensus": {
+        "mining_enabled": false,
+        "miner_address": "",
+        "threads": 0
+    },
+    "persistence": {
+        "engine": "sqlite",
+        "db_name": "wallet_recipient.db",
+        "prune_history": true
+    },
+    "api": {
+        "host": "0.0.0.0",
+        "port_default": 8089
+    }
+}

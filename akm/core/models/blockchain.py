@@ -7,13 +7,16 @@ from akm.core.models.block import Block
 from akm.core.models.block_header import BlockHeader
 from akm.core.interfaces.i_repository import IBlockchainRepository
 from akm.core.interfaces.i_chain import IChain
+from akm.core.managers.utxo_set import UTXOSet  # <--- [IMPORTANTE] Importamos el Gestor de Estado
 
 logger = logging.getLogger(__name__)
 
 class Blockchain(IChain): 
 
-    def __init__(self, repository: IBlockchainRepository):
+    # [CAMBIO 1] Inyectamos el UTXOSet en el constructor
+    def __init__(self, repository: IBlockchainRepository, utxo_set: UTXOSet):
         self._repository = repository
+        self.utxo_set = utxo_set # Guardamos referencia al Tesorero
         logger.info(f"🚀 Sistema iniciado. Altura actual: {self.height}")
 
     # --- Getters ---
@@ -39,18 +42,18 @@ class Blockchain(IChain):
 
     def add_block(self, block: Block) -> bool:
         """
-        Agrega un bloque a la persistencia.
+        Agrega un bloque a la persistencia Y ACTUALIZA EL ESTADO FINANCIERO.
         """
         try:
-            # [CORRECCIÓN 1] Usamos 'Any' para engañar al Linter.
-            # La interfaz espera 'Block', pero SQLite necesita 'Dict'.
-            # Al tiparlo como Any, el linter deja de quejarse.
+            # 1. Guardar el bloque físico en disco/DB
             block_data: Any = block.to_dict()
-            
             success = self._repository.save_block(block_data)
             
             if success:
-                logger.info(f"✅ Bloque #{block.index} guardado en DB permanentemente.")
+                # [CAMBIO CRÍTICO] 2. Actualizar el Estado (Quemar billetes viejos, crear nuevos)
+                self._update_utxo_state(block)
+                
+                logger.info(f"✅ Bloque #{block.index} procesado y saldos actualizados.")
                 return True
             else:
                 logger.error(f"❌ Fallo al escribir Bloque #{block.index} en DB.")
@@ -62,13 +65,38 @@ class Blockchain(IChain):
 
     def replace_chain(self, new_chain: List[Block]) -> None:
         try:
-            # [CORRECCIÓN 2] Lo mismo para la lista de bloques
+            # En un reemplazo de cadena (Reorg), lo ideal es recalcular todo el UTXO set.
+            # Por simplicidad aquí, solo guardamos los bloques. 
+            # En producción, deberías hacer rollback del UTXO set.
             chain_data: Any = [b.to_dict() for b in new_chain]
             
             self._repository.save_blocks_atomic(chain_data)
-            logger.info(f"🔄 Cadena reemplazada. Nueva altura: {len(new_chain)}.")
+            
+            # Reconstrucción forzada del estado (simple)
+            logger.warning("🔄 Cadena reemplazada. Reconstruyendo estado UTXO...")
+            self.utxo_set.clear()
+            for block in new_chain:
+                self._update_utxo_state(block)
+                
+            logger.info(f"🔄 Estado sincronizado con nueva cadena (Altura: {len(new_chain)}).")
         except Exception:
             logger.exception("❌ Error crítico en reemplazo de cadena.")
+
+    # --- [NUEVO MÉTODO] Lógica del Dinero ---
+    def _update_utxo_state(self, block: Block) -> None:
+        """
+        Aplica los cambios financieros del bloque al UTXOSet global.
+        Aquí es donde se previene el doble gasto.
+        """
+        for tx in block.transactions:
+            # A. Si NO es Coinbase, consumimos los Inputs (Restar dinero del remitente)
+            if not tx.is_coinbase:
+                self.utxo_set.remove_inputs(tx.inputs)
+            
+            # B. Siempre creamos los Outputs (Sumar dinero al destinatario)
+            self.utxo_set.add_outputs(tx.tx_hash, tx.outputs)
+
+    # --- Resto de métodos de consulta ---
 
     def get_block_by_hash(self, block_hash: str) -> Optional[Block]:
         data: Any = self._repository.get_block_by_hash(block_hash)
@@ -83,10 +111,7 @@ class Blockchain(IChain):
     def get_blocks_range(self, start_index: int, limit: int) -> List[Block]:
         data_list: Any = self._repository.get_blocks_range(start_index, limit)
         
-        # [CORRECCIÓN 3] Definimos explícitamente el tipo de la lista resultante
-        # Esto soluciona el error "Type of append is partially unknown"
         result: List[Block] = []
-        
         if data_list:
             for d in data_list:
                 if isinstance(d, Block):

@@ -1,4 +1,5 @@
 # akm/core/nodes/miner_node.py
+
 import logging
 import threading
 import time
@@ -7,14 +8,12 @@ from typing import Optional, Dict, Any
 # Herencia
 from akm.core.nodes.full_node import FullNode
 
-# Interfaces e Implementaciones
-from akm.infra.network.p2p_service import P2PService 
-
-# Configuración
+# Configuración y Constantes
 from akm.core.config.mining_config import MiningConfig 
 from akm.core.config.protocol_constants import ProtocolConstants
 
-# Dependencias Managers
+# Interfaces y Managers
+from akm.infra.network.p2p_service import P2PService 
 from akm.core.managers.mining_manager import MiningManager
 from akm.core.managers.gossip_manager import GossipManager
 from akm.core.models.blockchain import Blockchain
@@ -23,13 +22,13 @@ from akm.core.services.mempool import Mempool
 from akm.core.managers.consensus_orchestrator import ConsensusOrchestrator
 from akm.core.managers.chain_reorg_manager import ChainReorgManager
 
-# Logging local
 logger = logging.getLogger(__name__)
 
 class MinerNode(FullNode):
     """
-    [LSP] Nodo Minero.
-    Extiende FullNode con capacidades de minería activa.
+    Nodo Minero.
+    Hereda de FullNode, por lo que ya sabe validar y sincronizar.
+    Solo agrega la capacidad de crear bloques (Proof of Work).
     """
 
     def __init__(
@@ -44,124 +43,105 @@ class MinerNode(FullNode):
         mining_manager: MiningManager,
         mining_config: MiningConfig 
     ):
-        # Inicializar el Padre (FullNode)
+        # 1. Inicializar al Padre (FullNode -> BaseNode)
         super().__init__(
             p2p_service, gossip_manager, blockchain, utxo_set, mempool, consensus, reorg_manager
         )
         
-        self.gossip: GossipManager = gossip_manager
+        # [FIX TIPO] Explicitamos que self._gossip es del tipo GossipManager
+        self._gossip: GossipManager = gossip_manager
+        
+        # 2. Configuración específica de Minería
         self.miner = mining_manager
-        
-        # Cargar configuración desde el objeto inyectado
         self._miner_address: Optional[str] = mining_config.default_miner_address
-        
         self._mining_active = False
         
-        # Evento para cancelar minería si llega un bloque externo
+        # Evento para detener el minado actual si alguien más gana
         self._interrupt_mining = threading.Event()
 
-    # --- [NUEVO] MÉTODO START PARA AUTOMATIZAR EL ARRANQUE ---
     def start(self):
-        """
-        Sobreescribe el start() del padre.
-        1. Arranca la red (P2P).
-        2. Arranca la minería automáticamente.
-        """
-        # 1. Arrancar servicios de red (Lógica del padre - FullNode)
-        super().start()
+        """Arranca la red (Padre) y luego el Minero."""
+        super().start() 
         
-        # 2. Arrancar Minería Automática
         if self._miner_address:
-            logger.info(f"🔨 Auto-iniciando minería para: {self._miner_address}")
-            self.start_mining_loop()
+            logger.info(f"🔨 Auto-iniciando minería hacia: {self._miner_address}")
+            self._start_mining_thread()
         else:
-            logger.warning("⚠️ Minero arrancado pero SIN dirección de billetera configurada. Modo pasivo (No mina).")
-    # ---------------------------------------------------------
+            logger.warning("⚠️ Minero activo pero SIN dirección de pago configurada.")
 
-    def start_mining_loop(self, miner_address: Optional[str] = None):
-        """Inicia el proceso de minería en un hilo separado."""
-        # Prioridad: Argumento > Configuración inyectada
-        address_to_use = miner_address if miner_address else self._miner_address
+    # --- [NUEVO] Métodos requeridos por la API (dependencies.py) ---
+    
+    def stop_mining(self):
+        """
+        Detiene el proceso de minería.
+        Usado por la API cuando se cambia de identidad o se apaga el nodo.
+        """
+        if self._mining_active:
+            self._mining_active = False
+            self._interrupt_mining.set()
+            logger.info("🛑 Minería detenida manualmente.")
+
+    def start_mining_loop(self, address: str):
+        """
+        Inicia (o reinicia) el proceso de minería con una dirección específica.
+        Usado por la API cuando el usuario hace Login.
+        """
+        self._miner_address = address
         
-        if not address_to_use:
-            logger.error("❌ No se puede iniciar minería: Falta dirección de pago (Wallet Address).")
-            return
+        if not self._mining_active:
+            logger.info(f"⛏️ Iniciando motor de minería para: {address}")
+            self._start_mining_thread()
+        else:
+            logger.info(f"⛏️ Dirección de minería actualizada en caliente: {address}")
 
-        self._miner_address = address_to_use
+    # ---------------------------------------------------------------
+
+    def _start_mining_thread(self):
         self._mining_active = True
         self._interrupt_mining.clear()
-        
-        mining_thread = threading.Thread(target=self._mining_worker, daemon=True)
-        mining_thread.start()
-        logger.info(f"⛏️ Minería ACTIVA -> {self._miner_address[:10]}...")
-
-    def stop_mining(self):
-        self._mining_active = False
-        self._interrupt_mining.set() # Forzar salida inmediata del loop de minería
-        logger.info("🛑 Minería detenida.")
+        threading.Thread(target=self._mining_loop, daemon=True).start()
+        logger.info(f"⛏️  Motor de Minería: ENCENDIDO")
 
     def _process_payload(self, msg_type: str, payload: Dict[str, Any], peer_id: str):
         """
-        Manejador Central de Mensajes.
+        Intercepta mensajes. Si llega un BLOQUE válido de la red,
+        interrumpe el trabajo actual.
         """
-        # 1. Delegar mensajes de Sincronización/SPV al GossipManager
-        if msg_type in [ProtocolConstants.MSG_GET_HEADERS, ProtocolConstants.MSG_GET_MERKLE_PROOF]:
-            if hasattr(self.gossip, 'dispatch_message'):
-                self.gossip.dispatch_message(msg_type, payload, peer_id)
-            else:
-                logger.error(f"GossipManager no tiene dispatch_message para {msg_type}")
-            return
-
-        # 2. Procesamiento normal del Nodo Completo (FullNode)
+        # 1. Dejar que el FullNode procese el mensaje
         super()._process_payload(msg_type, payload, peer_id)
         
-        # 3. Lógica Reactiva del Minero
+        # 2. Reacción del Minero
         if msg_type == ProtocolConstants.MSG_BLOCK:
+            # Si llegó un bloque, paramos de minar el actual
             if self._mining_active:
-                logger.info("⚡ [Miner] Bloque válido recibido. Reiniciando trabajo...")
-                self._interrupt_mining.set()
+                self._interrupt_mining.set() 
 
-    def mine_one_block(self, miner_address: Optional[str] = None) -> bool:
-        """Intenta minar un solo bloque."""
-        target_address = miner_address if miner_address else self._miner_address
-
-        if not target_address:
-            logger.error("Falta dirección de minero.")
-            return False
-        
-        if not self._miner_address:
-            self._miner_address = target_address
-
-        self._interrupt_mining.clear()
-
-        try:
-            # Minar pasando el evento de interrupción
-            new_block = self.miner.mine_block(target_address, interrupt_event=self._interrupt_mining)
-            
-            # Si es None, fuimos interrumpidos
-            if new_block is None:
-                return False
-
-            # Intentar añadir al consenso local
-            if self.consensus.add_block(new_block):
-                logger.info(f"💎 ¡BLOQUE ENCONTRADO! Hash: {new_block.hash[:8]}")
-                
-                # Propagar el bloque a la red
-                if hasattr(self.gossip, 'propagate_block'):
-                    self.gossip.propagate_block(new_block.to_dict())
-                return True
-            else:
-                logger.warning("Bloque propio rechazado por consenso interno (Stale o Inválido).")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Error crítico en ciclo de minería: {e}")
-            return False
-
-    def _mining_worker(self):
-        """Loop infinito (en hilo) que llama a mine_one_block repetidamente."""
+    def _mining_loop(self):
+        """Bucle infinito de intento de minado."""
         while self._mining_active:
-            self.mine_one_block()
-            # Pequeña pausa para no saturar CPU
-            if self._mining_active:
-                time.sleep(0.01)
+            self._interrupt_mining.clear()
+            
+            if not self._miner_address:
+                time.sleep(1)
+                continue
+
+            try:
+                # Intentar minar un bloque
+                new_block = self.miner.mine_block(
+                    self._miner_address, 
+                    interrupt_event=self._interrupt_mining
+                )
+                
+                # Si new_block existe, significa que NO fuimos interrumpidos y ganamos
+                if new_block:
+                    if self.consensus.add_block(new_block):
+                        tx_count = len(new_block.transactions)
+                        logger.info(f"💎 ¡BLOQUE #{new_block.index} MINADO! Hash: {new_block.hash[:8]} | TXs: {tx_count}")
+                        
+                        self._gossip.propagate_block(new_block.to_dict())
+                    else:
+                        logger.warning("Bloque propio rechazado (Stale/Viejo).")
+
+            except Exception as e:
+                logger.error(f"Error en hilo de minería: {e}")
+                time.sleep(1)

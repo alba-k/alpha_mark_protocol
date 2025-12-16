@@ -9,6 +9,7 @@ from akm.core.models.block import Block
 from akm.core.models.blockchain import Blockchain
 from akm.core.models.transaction import Transaction
 from akm.core.config.consensus_config import ConsensusConfig
+from akm.core.config.protocol_constants import ProtocolConstants # <--- IMPORTANTE
 
 # Servicios del Dominio
 from akm.core.services.mempool import Mempool
@@ -57,15 +58,19 @@ class MiningManager:
             bits = self._calculate_required_bits(last_block, new_height)
 
             # 3. Selección de transacciones
+            # [FIX CRÍTICO]: Usamos un límite por BLOQUE, no el tamaño total del mempool.
+            # Si el mempool tiene 50.000 txs, solo tomamos 2.000 para que el bloque no pese 100MB.
+            max_txs_per_block = getattr(ProtocolConstants, 'MAX_TX_PER_BLOCK', 2000)
+            
             pending_txs = self._mempool.get_transactions_for_block(
-                max_count=self._consensus_config.mempool_max_size
+                max_count=max_txs_per_block
             )
 
             # 4. Creación de recompensa (Coinbase)
             coinbase_tx = self._create_coinbase_tx(miner_address, new_height, pending_txs)
             block_transactions = [coinbase_tx] + pending_txs
 
-            # 5. Ejecución del minado (El BlockBuilder ya logueará el proceso de hashing)
+            # 5. Ejecución del minado
             new_block = BlockBuilder.build(
                 transactions=block_transactions,
                 previous_hash=last_block.hash, 

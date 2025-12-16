@@ -2,7 +2,7 @@
 
 import logging
 import binascii
-from typing import Dict, Any
+from typing import Dict, Any, Union
 
 # Dependencias Criptográficas
 from ecdsa import VerifyingKey, SECP256k1, util, BadSignatureError # type: ignore
@@ -21,7 +21,7 @@ class TransactionValidator:
         try:
             calculated_hash = TransactionHasher.calculate(transaction)
             if calculated_hash != transaction.tx_hash:
-                logger.info(f"Integridad TX fallida: ID {transaction.tx_hash[:8]}")
+                logger.info(f"Integridad TX fallida: ID {transaction.tx_hash[:8]} != Calculado {calculated_hash[:8]}")
                 return False
             return True
         except Exception:
@@ -34,11 +34,11 @@ class TransactionValidator:
             total_cost = transaction.total_output_albas + transaction.fee
             
             if total_cost <= 0:
-                logger.info(f"TX {transaction.tx_hash[:8]} rechazada: Costo <= 0.")
+                logger.info(f"TX {transaction.tx_hash[:8]} rechazada: Costo total <= 0.")
                 return False
                 
             if total_input_albas < total_cost:
-                logger.info(f"TX {transaction.tx_hash[:8]} rechazada: Fondos insuficientes.")
+                logger.info(f"TX {transaction.tx_hash[:8]} rechazada: Fondos insuficientes (Input: {total_input_albas} < Costo: {total_cost}).")
                 return False
             return True
         except Exception:
@@ -46,32 +46,46 @@ class TransactionValidator:
             return False
 
     @staticmethod
-    def verify_signature(public_key_hex: str, tx_hash: str, signature_hex: str) -> bool:
+    def verify_signature(public_key_hex: str, tx_hash: Union[str, bytes], signature_hex: str) -> bool:
         """Verificación técnica de firma ECDSA (estándar SECP256k1)."""
         try:
+            # 1. Preparar Llave Pública y Firma
             pub_key_bytes = binascii.unhexlify(public_key_hex)
             signature_bytes = binascii.unhexlify(signature_hex)
-            hash_bytes = binascii.unhexlify(tx_hash)
+            
+            # 2. Preparar Hash (Manejo robusto Str/Bytes)
+            if isinstance(tx_hash, str):
+                # Si es un string hexadecimal de 64 caracteres (32 bytes), lo convertimos
+                if len(tx_hash) == 64:
+                    hash_bytes = binascii.unhexlify(tx_hash)
+                else:
+                    hash_bytes = tx_hash.encode('utf-8')
+            else:
+                hash_bytes = tx_hash
 
+            # 3. Verificar con librería ECDSA
             vk = VerifyingKey.from_string(pub_key_bytes, curve=SECP256k1) # type: ignore
             return vk.verify_digest(signature_bytes, hash_bytes, sigdecode=util.sigdecode_der) # type: ignore
 
-        except (ValueError, BadSignatureError, binascii.Error):
-            logger.info("Firma criptográfica inválida.")
+        except (ValueError, binascii.Error) as e:
+            logger.error(f"Error de formato en verificación de firma: {e}")
+            return False
+        except BadSignatureError:
+            logger.info("Firma criptográfica no válida para esta llave pública.")
             return False
         except Exception:
-            logger.exception("Error técnico en motor ECDSA")
+            logger.exception("Error técnico no controlado en motor ECDSA")
             return False
 
     @staticmethod
     def _engine_signature_adapter(signature: bytes, pub_key: bytes, tx: Any, input_idx: int) -> bool:
-    
         try:
+            # El ScriptEngine pasa bytes, TransactionValidator espera Hex strings o bytes controlados
             tx_hash_bytes = tx.get_hash_for_signature(input_idx)
             
             return TransactionValidator.verify_signature(
                 public_key_hex=pub_key.hex(),
-                tx_hash=tx_hash_bytes.hex() if isinstance(tx_hash_bytes, bytes) else tx_hash_bytes,
+                tx_hash=tx_hash_bytes, # Pasamos bytes directo
                 signature_hex=signature.hex()
             )
         except Exception as e:
@@ -87,7 +101,7 @@ class TransactionValidator:
                 script_pubkey = previous_outputs.get(i)
                 
                 if not script_pubkey:
-                    logger.info(f"TX {transaction.tx_hash[:8]}: UTXO {i} no encontrado.")
+                    logger.error(f"TX {transaction.tx_hash[:8]}: UTXO {i} no encontrado para ejecutar script.")
                     return False
 
                 if not engine.execute(

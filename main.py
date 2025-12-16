@@ -78,8 +78,16 @@ def inject_environment(config: dict[str, Any], instance_name: str, overrides: di
     Paths.ensure_directories_exist()
     
     net = config.get("network", {})
-    os.environ["AKM_P2P_HOST"] = net.get("p2p_host", "0.0.0.0")
     
+    # ==============================================================================
+    # 🛠️ CORRECCIÓN CRÍTICA DE RED
+    # Forzamos "0.0.0.0" para que Windows no cierre el programa por error de IP.
+    # Ignoramos lo que diga el archivo JSON en 'p2p_host'.
+    # ==============================================================================
+    # os.environ["AKM_P2P_HOST"] = net.get("p2p_host", "0.0.0.0")  <-- LÍNEA ORIGINAL COMENTADA
+    os.environ["AKM_P2P_HOST"] = "0.0.0.0"                        # <-- NUEVA LÍNEA FORZADA
+    # ==============================================================================
+
     p2p_port = overrides.get("p2p_port") or net.get("p2p_port_default", 5000)
     os.environ["AKM_P2P_PORT"] = str(p2p_port)
 

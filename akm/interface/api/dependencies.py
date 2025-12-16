@@ -2,6 +2,9 @@
 import logging
 from typing import Optional, Dict, Any, Union
 
+# Framework Imports
+from fastapi import HTTPException, status
+
 # Imports de Capa Core
 from akm.core.nodes.miner_node import MinerNode
 from akm.core.nodes.spv_node import SPVNode 
@@ -65,10 +68,8 @@ class NodeContainer:
         return cls._keystore
 
     @classmethod
-    def get_active_identity(cls) -> Dict[str, Any]:
-        if cls._active_identity is None:
-            logger.debug("⚠️ Billetera BLOQUEADA. Se intentó acceder a la identidad activa sin login.")
-            raise RuntimeError("⚠️ Billetera BLOQUEADA. Carga una identidad primero.")
+    def get_active_identity(cls) -> Optional[Dict[str, Any]]:
+        """Devuelve la identidad activa o None si no hay login."""
         return cls._active_identity
 
     @classmethod
@@ -115,4 +116,19 @@ def get_keystore_dependency() -> Keystore:
     return NodeContainer.get_keystore()
 
 def get_identity_dependency() -> Dict[str, Any]:
-    return NodeContainer.get_active_identity()
+    """
+    Inyector de dependencia para endpoints que requieren autenticación.
+    Si la billetera está bloqueada, devuelve un error HTTP 401 controlado
+    en lugar de crashear el servidor.
+    """
+    identity = NodeContainer.get_active_identity()
+    
+    if identity is None:
+        logger.warning("🚫 Acceso denegado: Intento de operación sin identidad cargada.")
+        # [FIX] Lanzamos HTTPException en lugar de RuntimeError para no tumbar Uvicorn
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Billetera bloqueada. Por favor, desbloquea tu billetera primero (/wallet/load)."
+        )
+        
+    return identity
